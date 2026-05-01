@@ -78,13 +78,15 @@
     .darkBtn:hover { background:#030712; }
     .lightBtn { background:#e5e7eb; color:#111827; }
     .lightBtn:hover { background:#d1d5db; }
+    .successBtn { background:var(--green); }
+    .successBtn:hover { background:#15803d; }
 
     .ok { color:var(--green); font-weight:bold; }
     .bad { color:var(--red); font-weight:bold; }
     .warn { color:var(--orange); font-weight:bold; }
     .muted { color:var(--muted); }
 
-    .shell { width:100%; max-width:1600px; margin:0 auto; }
+    .shell { width:100%; max-width:1700px; margin:0 auto; }
 
     .card {
       background:white;
@@ -177,9 +179,33 @@
     .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
     .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
 
-    .leaderLayout {
+    .leaderTabs {
       display:grid;
-      grid-template-columns:minmax(0, 420px) minmax(0, 1fr) minmax(0, 440px);
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .leaderTabs button {
+      background:#e5e7eb;
+      color:#111827;
+    }
+
+    .leaderTabs button.active {
+      background:var(--blue);
+      color:white;
+    }
+
+    .leaderScanLayout {
+      display:grid;
+      grid-template-columns:minmax(0, 430px) minmax(0, 1fr);
+      gap:20px;
+      align-items:start;
+    }
+
+    .leaderMembersLayout {
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) minmax(0, 460px);
       gap:20px;
       align-items:start;
     }
@@ -200,7 +226,7 @@
       border:3px solid var(--blue);
     }
 
-    .queueList, .assignmentsList { display:flex; flex-direction:column; gap:12px; }
+    .queueList, .memberList, .assignmentsList { display:flex; flex-direction:column; gap:12px; }
 
     .queueItem {
       border:1px solid var(--border);
@@ -218,6 +244,26 @@
     .queueItem:hover { border-color:var(--blue); box-shadow:0 0 0 4px rgba(37,99,235,.10); }
     .queueItem.badBag { border-color:#fecaca; background:#fff1f2; }
     .queueItem.doneBag { border-color:#bbf7d0; background:#f0fdf4; }
+
+    .memberItem {
+      border:1px solid var(--border);
+      background:#f9fafb;
+      border-radius:18px;
+      padding:16px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:12px;
+      align-items:center;
+    }
+
+    .memberActions {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .memberActions button { width:auto; font-size:15px; padding:10px 12px; border-radius:10px; }
 
     .assignmentItem {
       border:1px solid var(--border);
@@ -274,6 +320,18 @@
     @keyframes errorPulse {
       0% { box-shadow:0 0 0 0 rgba(239,68,68,.4); }
       100% { box-shadow:0 0 0 12px rgba(239,68,68,0); }
+    }
+
+    .assignmentBanner {
+      background:#eff6ff;
+      border:2px solid #bfdbfe;
+      color:#1e3a8a;
+      border-radius:20px;
+      padding:16px;
+      margin-bottom:18px;
+      font-weight:bold;
+      font-size:20px;
+      line-height:1.45;
     }
 
     .taskHeader {
@@ -397,7 +455,7 @@
     tr.badRow { background:#fff1f2; }
 
     @media(max-width:1300px){
-      .leaderLayout { grid-template-columns:1fr; }
+      .leaderScanLayout, .leaderMembersLayout { grid-template-columns:1fr; }
     }
 
     @media(max-width:1100px){
@@ -420,6 +478,10 @@
       .taskMeta { grid-template-columns:1fr; }
       .taskActions { grid-template-columns:1fr; }
       .mealGrid { grid-template-columns:1fr; }
+      .leaderTabs { grid-template-columns:1fr; }
+      .memberItem { grid-template-columns:1fr; }
+      .memberActions { justify-content:stretch; }
+      .memberActions button { width:100%; }
     }
   </style>
 </head>
@@ -466,17 +528,17 @@
 
   <div id="modeScreen" class="card">
     <h2>Wybierz tryb pracy</h2>
-    <p class="muted">Lider tworzy stanowisko, przydziela pracowników do posiłków i skanuje torby do kolejki.</p>
+    <p class="muted">Pracownik najpierw dołącza do stanowiska. Lider widzi obecnych ludzi i dopiero wtedy rozdaje im posiłki.</p>
 
     <div class="modeGrid">
       <div class="modeCard" onclick="showLeaderSetup()">
         <h2>👑 Lider</h2>
-        <p class="muted">Tworzysz stanowisko, przydzielasz posiłki i kontrolujesz kolejkę.</p>
+        <p class="muted">Tworzysz stanowisko, skanujesz torby i zarządzasz przydziałem posiłków.</p>
       </div>
 
       <div class="modeCard" onclick="showWorkerSetup()">
         <h2>👷 Pracownik</h2>
-        <p class="muted">Dołączasz do stanowiska i dostajesz zadania przypisane przez lidera.</p>
+        <p class="muted">Dołączasz do stanowiska i czekasz na przydział od lidera.</p>
       </div>
     </div>
   </div>
@@ -495,7 +557,7 @@
 
   <div id="workerSetupScreen" class="card hidden">
     <h2>👷 Dołącz do stanowiska</h2>
-    <p class="muted">Wybierz stanowisko. Posiłki są przypisane przez lidera.</p>
+    <p class="muted">Wybierz stanowisko. Nie wybierasz posiłków — zrobi to lider.</p>
 
     <div class="grid2">
       <div class="formGroup">
@@ -513,44 +575,56 @@
   </div>
 
   <div id="leaderScreen" class="hidden">
-    <div class="leaderLayout">
-      <div class="card">
-        <h2>📦 Skanuj torby do kolejki</h2>
-        <p class="muted">Kliknij torbę w kolejce, żeby zobaczyć jej aktualną zawartość.</p>
+    <div class="leaderTabs">
+      <button id="leaderScanTabBtn" class="active" onclick="showLeaderTab('scan')">📦 Skanowanie toreb</button>
+      <button id="leaderMembersTabBtn" onclick="showLeaderTab('members')">👥 Pracownicy i posiłki</button>
+    </div>
 
-        <input id="leaderBagInput" class="scanInput" placeholder="Zeskanuj torbę">
-        <p id="leaderStatus" class="statusBox muted"></p>
+    <div id="leaderScanTab">
+      <div class="leaderScanLayout">
+        <div class="card">
+          <h2>📦 Skanuj torby do kolejki</h2>
+          <p class="muted">Kliknij torbę w kolejce, żeby zobaczyć jej aktualną zawartość.</p>
 
-        <div class="grid2">
-          <button class="lightBtn" onclick="loadQueue()">Odśwież kolejkę</button>
-          <button class="danger" onclick="closeCurrentLine()">Zamknij stanowisko</button>
+          <input id="leaderBagInput" class="scanInput" placeholder="Zeskanuj torbę">
+          <p id="leaderStatus" class="statusBox muted"></p>
+
+          <div class="grid2">
+            <button class="lightBtn" onclick="loadQueue()">Odśwież kolejkę</button>
+            <button class="danger" onclick="closeCurrentLine()">Zamknij stanowisko</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📋 Kolejka stanowiska</h2>
+          <div id="leaderQueue" class="queueList"></div>
         </div>
       </div>
+    </div>
 
-      <div class="card">
-        <h2>📋 Kolejka stanowiska</h2>
-        <div id="leaderQueue" class="queueList"></div>
-      </div>
-
-      <div class="card">
-        <h2>👥 Przydział pracowników</h2>
-        <p class="muted">Lider wybiera, który pracownik pakuje które posiłki.</p>
-
-        <div class="formGroup">
-          <label>Login lub email pracownika</label>
-          <input id="assignWorkerLogin" placeholder="np. JanKowalski">
+    <div id="leaderMembersTab" class="hidden">
+      <div class="leaderMembersLayout">
+        <div class="card">
+          <h2>👥 Pracownicy na stanowisku</h2>
+          <p class="muted">Pracownicy sami dołączają do stanowiska. Lider przypisuje im posiłki tutaj.</p>
+          <div id="membersList" class="memberList"></div>
         </div>
 
-        <div class="formGroup">
-          <label>Posiłki dla pracownika</label>
-          <div id="leaderMealsBox" class="mealGrid"></div>
+        <div class="card">
+          <h2 id="assignmentTitle">Przydział posiłków</h2>
+          <p class="muted" id="assignmentHint">Wybierz pracownika z listy po lewej.</p>
+
+          <input id="assignWorkerEmail" type="hidden">
+
+          <div class="formGroup">
+            <label>Posiłki dla pracownika</label>
+            <div id="leaderMealsBox" class="mealGrid"></div>
+          </div>
+
+          <button onclick="saveSelectedMemberMeals()">💾 Zapisz przydział</button>
+          <button class="danger" style="margin-top:10px;" onclick="clearSelectedMemberMeals()">Usuń przydział</button>
+          <p id="assignmentStatus" class="statusBox muted"></p>
         </div>
-
-        <button onclick="assignWorkerMeals()">💾 Przypisz posiłki</button>
-        <p id="assignmentStatus" class="statusBox muted"></p>
-
-        <h3>Aktualne przydziały</h3>
-        <div id="assignmentsList" class="assignmentsList"></div>
       </div>
     </div>
   </div>
@@ -558,6 +632,7 @@
   <div id="workerScreen" class="hidden">
     <div class="workerLayout">
       <div>
+        <div id="workerAssignmentBox" class="assignmentBanner">Czekam na przydział od lidera...</div>
         <div id="currentTaskBox" class="taskCard">
           <div class="emptyState">Brak zadania. Czekam na torby w kolejce...</div>
         </div>
@@ -565,7 +640,7 @@
 
       <div class="card">
         <h2>⏭️ Kolejne zadania</h2>
-        <p class="muted">Lista pokazuje kolejne torby z posiłków przypisanych przez lidera.</p>
+        <p class="muted">Lista pokazuje kolejne torby z Twoich aktualnych posiłków.</p>
         <div id="nextTasks" class="nextList"></div>
       </div>
     </div>
@@ -595,6 +670,9 @@ let currentRole = null;
 let currentMode = null;
 let currentLineId = null;
 let currentLineName = "";
+let leaderActiveTab = "scan";
+let selectedMemberEmail = "";
+let myAssignedMeals = [];
 let taskList = [];
 let currentTask = null;
 let currentBadScan = null;
@@ -783,6 +861,9 @@ function goToModeScreen() {
   currentMode = null;
   currentLineId = null;
   currentLineName = "";
+  leaderActiveTab = "scan";
+  selectedMemberEmail = "";
+  myAssignedMeals = [];
   taskList = [];
   currentTask = null;
   currentBadScan = null;
@@ -903,13 +984,27 @@ async function enterLeaderScreen(lineId, lineName) {
 
   setStatus("leaderStatus", "Gotowe. Skanuj torby do kolejki.", "muted");
   el("leaderBagInput").value = "";
-  el("leaderBagInput").focus();
 
   await loadMeals();
   await loadQueue();
-  await loadAssignments();
+  await loadMembers();
+  showLeaderTab("scan");
   startLeaderRefresh();
   sound("ok");
+}
+
+function showLeaderTab(tab) {
+  leaderActiveTab = tab;
+  el("leaderScanTab").classList.toggle("hidden", tab !== "scan");
+  el("leaderMembersTab").classList.toggle("hidden", tab !== "members");
+  el("leaderScanTabBtn").classList.toggle("active", tab === "scan");
+  el("leaderMembersTabBtn").classList.toggle("active", tab === "members");
+
+  if (tab === "scan") {
+    setTimeout(() => el("leaderBagInput")?.focus(), 80);
+  } else {
+    loadMembers();
+  }
 }
 
 el("leaderBagInput").addEventListener("keydown", e => { if (e.key === "Enter") addLeaderBag(); });
@@ -1078,8 +1173,61 @@ function closeBagDetails() {
   el("bagDetailsModal").classList.add("hidden");
 }
 
-async function assignWorkerMeals() {
-  const email = getEmail(el("assignWorkerLogin").value);
+async function loadMembers() {
+  if (!currentLineId) return;
+
+  const { data, error } = await supabaseClient.rpc("get_station_line_members", { target_line_id: currentLineId });
+
+  if (error) {
+    el("membersList").innerHTML = `<div class="bad">Błąd pobierania pracowników: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+
+  const rows = data || [];
+
+  if (!rows.length) {
+    el("membersList").innerHTML = `<div class="emptyState">Nikt jeszcze nie dołączył do stanowiska.</div>`;
+    return;
+  }
+
+  el("membersList").innerHTML = rows.map(row => {
+    const meals = row.meals || [];
+    const mealsText = meals.length ? meals.join(", ") : "brak przydziału";
+    return `
+      <div class="memberItem">
+        <div>
+          <div class="bagCode">${escapeHtml(displayLogin(row.user_email))}</div>
+          <div class="muted">Posiłki: <b>${escapeHtml(mealsText)}</b></div>
+        </div>
+        <div class="memberActions">
+          <button onclick="selectMemberForEdit('${escapeHtml(row.user_email)}', ${encodeURIComponent(JSON.stringify(meals))})">Edytuj</button>
+          <button class="danger" onclick="removeMemberMeals('${escapeHtml(row.user_email)}')">Usuń posiłki</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function selectMemberForEdit(email, encodedMeals) {
+  selectedMemberEmail = email;
+  el("assignWorkerEmail").value = email;
+  el("assignmentTitle").innerText = "Przydział: " + displayLogin(email);
+  el("assignmentHint").innerText = "Zaznacz posiłki, które ten pracownik ma pakować teraz.";
+
+  let meals = [];
+  try {
+    meals = JSON.parse(decodeURIComponent(encodedMeals));
+  } catch(e) {}
+
+  [...el("leaderMealsBox").querySelectorAll("input[type='checkbox']")].forEach(input => {
+    input.checked = meals.includes(input.value);
+  });
+
+  setStatus("assignmentStatus", "Edytujesz przydział dla: " + email, "muted");
+}
+
+async function saveSelectedMemberMeals() {
+  const email = selectedMemberEmail || el("assignWorkerEmail").value;
   const checked = [...el("leaderMealsBox").querySelectorAll("input[type='checkbox']:checked")];
   const meals = checked.map(x => x.value);
 
@@ -1089,13 +1237,13 @@ async function assignWorkerMeals() {
   }
 
   if (!email) {
-    setStatus("assignmentStatus", "❌ Wpisz login lub email pracownika.", "bad");
+    setStatus("assignmentStatus", "❌ Wybierz pracownika z listy.", "bad");
     sound("bad");
     return;
   }
 
   if (!meals.length) {
-    setStatus("assignmentStatus", "❌ Wybierz minimum jeden posiłek.", "bad");
+    setStatus("assignmentStatus", "❌ Wybierz minimum jeden posiłek albo użyj przycisku Usuń przydział.", "bad");
     sound("bad");
     return;
   }
@@ -1114,35 +1262,49 @@ async function assignWorkerMeals() {
     return;
   }
 
-  setStatus("assignmentStatus", "✅ Przypisano posiłki dla: " + email, "ok");
-  el("assignWorkerLogin").value = "";
-  checked.forEach(x => x.checked = false);
-  await loadAssignments();
+  setStatus("assignmentStatus", "✅ Zapisano przydział dla: " + email, "ok");
+  await loadMembers();
   sound("ok");
 }
 
-async function loadAssignments() {
-  if (!currentLineId) return;
-
-  const { data, error } = await supabaseClient.rpc("get_station_line_assignments", { target_line_id: currentLineId });
-
-  if (error) {
-    el("assignmentsList").innerHTML = `<div class="bad">Błąd pobierania przydziałów: ${escapeHtml(error.message)}</div>`;
+async function clearSelectedMemberMeals() {
+  const email = selectedMemberEmail || el("assignWorkerEmail").value;
+  if (!email) {
+    setStatus("assignmentStatus", "❌ Wybierz pracownika z listy.", "bad");
     return;
   }
 
-  const rows = data || [];
-  if (!rows.length) {
-    el("assignmentsList").innerHTML = `<div class="muted">Brak przydziałów.</div>`;
+  await removeMemberMeals(email);
+}
+
+async function removeMemberMeals(email) {
+  if (!currentLineId || !email) return;
+
+  const ok = confirm("Usunąć przydział posiłków dla: " + displayLogin(email) + "?");
+  if (!ok) return;
+
+  const { data, error } = await supabaseClient.rpc("remove_station_worker_assignment", {
+    target_line_id: currentLineId,
+    worker_email: email
+  });
+
+  if (error || data !== "OK") {
+    setStatus("assignmentStatus", "❌ Nie udało się usunąć przydziału: " + (error?.message || data), "bad");
+    sound("bad");
     return;
   }
 
-  el("assignmentsList").innerHTML = rows.map(r => `
-    <div class="assignmentItem">
-      <b>${escapeHtml(displayLogin(r.user_email))}</b><br>
-      <span class="muted">${escapeHtml((r.meals || []).join(", "))}</span>
-    </div>
-  `).join("");
+  if (selectedMemberEmail === email) {
+    selectedMemberEmail = "";
+    el("assignWorkerEmail").value = "";
+    el("assignmentTitle").innerText = "Przydział posiłków";
+    el("assignmentHint").innerText = "Wybierz pracownika z listy po lewej.";
+    [...el("leaderMealsBox").querySelectorAll("input[type='checkbox']")].forEach(input => input.checked = false);
+  }
+
+  setStatus("assignmentStatus", "✅ Usunięto przydział dla: " + email, "ok");
+  await loadMembers();
+  sound("warn");
 }
 
 async function closeCurrentLine() {
@@ -1173,23 +1335,19 @@ async function joinAsWorker() {
     return;
   }
 
-  const { data: assigned, error: assignError } = await supabaseClient.rpc("get_my_station_assignment", { target_line_id: lineId });
-
-  if (assignError) {
-    setStatus("workerSetupStatus", "❌ Błąd sprawdzania przydziału: " + assignError.message, "bad");
-    sound("bad");
-    return;
-  }
-
-  if (!assigned || !assigned.length || !assigned[0].meals || !assigned[0].meals.length) {
-    setStatus("workerSetupStatus", "❌ Lider nie przypisał Ci posiłków na tym stanowisku.", "bad");
-    sound("bad");
-    return;
-  }
-
   const contextResult = await updateUserLockContext(lineId, "worker");
   if (contextResult !== "OK") {
     setStatus("workerSetupStatus", "❌ Błąd aktualizacji pracy użytkownika: " + contextResult, "bad");
+    sound("bad");
+    return;
+  }
+
+  const { data: joinResult, error: joinError } = await supabaseClient.rpc("join_station_line", {
+    target_line_id: lineId
+  });
+
+  if (joinError || joinResult !== "OK") {
+    setStatus("workerSetupStatus", "❌ Nie udało się dołączyć do stanowiska: " + (joinError?.message || joinResult), "bad");
     sound("bad");
     return;
   }
@@ -1204,13 +1362,44 @@ async function joinAsWorker() {
   hideAllMainScreens();
   el("workerScreen").classList.remove("hidden");
 
-  loadTasks();
+  await loadMyAssignment();
+  await loadTasks();
   startWorkerRefresh();
   sound("ok");
 }
 
+async function loadMyAssignment() {
+  if (!currentLineId) return;
+
+  const { data, error } = await supabaseClient.rpc("get_my_station_assignment", { target_line_id: currentLineId });
+
+  if (error) {
+    el("workerAssignmentBox").innerText = "Nie udało się pobrać przydziału: " + error.message;
+    el("workerAssignmentBox").className = "assignmentBanner bad";
+    myAssignedMeals = [];
+    return;
+  }
+
+  const row = data && data.length ? data[0] : null;
+  myAssignedMeals = row?.meals || [];
+
+  if (!myAssignedMeals.length) {
+    el("workerAssignmentBox").innerHTML = "Czekasz na przydział od lidera. Po przydzieleniu posiłków zadania pojawią się automatycznie.";
+    taskList = [];
+    currentTask = null;
+    renderWorkerTask();
+    return;
+  }
+
+  el("workerAssignmentBox").innerHTML = `Twoje aktualne posiłki: <b>${escapeHtml(myAssignedMeals.join(", "))}</b>`;
+}
+
 async function loadTasks() {
   if (!currentLineId || isBusy || currentBadScan) return;
+
+  await loadMyAssignment();
+
+  if (!myAssignedMeals.length) return;
 
   const { data, error } = await supabaseClient.rpc("get_station_tasks", { target_line_id: currentLineId });
 
@@ -1227,7 +1416,7 @@ async function loadTasks() {
 function renderWorkerTask(errorMessage = "") {
   if (!currentTask) {
     el("currentTaskBox").className = "taskCard";
-    el("currentTaskBox").innerHTML = `<div class="emptyState">Brak zadania. Czekam na torby w kolejce...</div>`;
+    el("currentTaskBox").innerHTML = `<div class="emptyState">${myAssignedMeals.length ? "Brak zadania. Czekam na torby w kolejce..." : "Czekasz na przydział posiłków od lidera."}</div>`;
     el("nextTasks").innerHTML = "";
     return;
   }
@@ -1415,8 +1604,8 @@ async function tryCloseCurrentBag() {
 function startLeaderRefresh() {
   stopRefresh();
   refreshTimer = setInterval(async () => {
-    await loadQueue();
-    await loadAssignments();
+    if (leaderActiveTab === "scan") await loadQueue();
+    if (leaderActiveTab === "members") await loadMembers();
   }, 3000);
 }
 
@@ -1465,7 +1654,7 @@ async function restoreExistingSession() {
 restoreExistingSession();
 
 window.addEventListener("click", () => {
-  if (currentMode === "leader" && !el("leaderScreen").classList.contains("hidden")) {
+  if (currentMode === "leader" && leaderActiveTab === "scan" && !el("leaderScreen").classList.contains("hidden")) {
     setTimeout(() => el("leaderBagInput")?.focus(), 50);
   }
   if (currentMode === "worker" && !el("workerScreen").classList.contains("hidden") && !currentBadScan) {
