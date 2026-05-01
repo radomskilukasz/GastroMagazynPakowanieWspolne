@@ -656,13 +656,28 @@ async function login() {
     return;
   }
 
+  const lockResult = await claimLoginLock();
+
+  if (lockResult !== "OK") {
+    await supabaseClient.auth.signOut();
+    setStatus(
+      "loginStatus",
+      lockResult === "ALREADY_LOGGED_IN"
+        ? "❌ UŻYTKOWNIK JEST JUŻ ZALOGOWANY na innym urządzeniu. Najpierw wyloguj go ręcznie."
+        : "❌ Błąd blokady użytkownika: " + lockResult,
+      "bad"
+    );
+    sound("bad");
+    return;
+  }
+
   el("currentUserLabel").innerText = displayLogin(currentUser.email);
   el("loginScreen").classList.add("hidden");
   el("appScreen").classList.remove("hidden");
 
   await loadLines();
   await loadMeals();
-  goToModeScreen(false);
+  goToModeScreen();
   sound("ok");
 }
 
@@ -672,8 +687,18 @@ async function logout() {
   location.reload();
 }
 
-async function claimUserLock(lineId, mode) {
-  const { data, error } = await supabaseClient.rpc("claim_station_user_lock", {
+async function claimLoginLock() {
+  const { data, error } = await supabaseClient.rpc("claim_station_login_lock");
+
+  if (error) {
+    return "ERROR:" + error.message;
+  }
+
+  return data;
+}
+
+async function updateUserLockContext(lineId, mode) {
+  const { data, error } = await supabaseClient.rpc("update_station_user_lock_context", {
     target_line_id: lineId,
     target_mode: mode
   });
@@ -696,9 +721,8 @@ function hideAllMainScreens() {
     .forEach(id => el(id).classList.add("hidden"));
 }
 
-async function goToModeScreen(shouldRelease = true) {
+async function goToModeScreen() {
   stopRefresh();
-  if (shouldRelease) await releaseUserLock();
   currentMode = null;
   currentLineId = null;
   currentLineName = "";
@@ -798,9 +822,9 @@ async function createLine() {
       return;
     }
 
-    const lock = await claimUserLock(existingId, "leader");
-    if (lock !== "OK") {
-      setStatus("leaderSetupStatus", lock === "ALREADY_LOGGED_IN" ? "❌ UŻYTKOWNIK JEST JUŻ ZALOGOWANY na innym urządzeniu/stanowisku." : "❌ Błąd blokady użytkownika: " + lock, "bad");
+    const contextResult = await updateUserLockContext(existingId, "leader");
+    if (contextResult !== "OK") {
+      setStatus("leaderSetupStatus", "❌ Błąd aktualizacji pracy użytkownika: " + contextResult, "bad");
       sound("bad");
       return;
     }
@@ -809,9 +833,9 @@ async function createLine() {
     return;
   }
 
-  const lockResult = await claimUserLock(result, "leader");
-  if (lockResult !== "OK") {
-    setStatus("leaderSetupStatus", lockResult === "ALREADY_LOGGED_IN" ? "❌ UŻYTKOWNIK JEST JUŻ ZALOGOWANY na innym urządzeniu/stanowisku." : "❌ Błąd blokady użytkownika: " + lockResult, "bad");
+  const contextResult = await updateUserLockContext(result, "leader");
+  if (contextResult !== "OK") {
+    setStatus("leaderSetupStatus", "❌ Błąd aktualizacji pracy użytkownika: " + contextResult, "bad");
     sound("bad");
     return;
   }
@@ -987,10 +1011,9 @@ async function closeCurrentLine() {
     return;
   }
 
-  await releaseUserLock();
   setStatus("leaderStatus", "✅ Stanowisko zamknięte.", "ok");
   sound("done");
-  setTimeout(() => goToModeScreen(false), 700);
+  setTimeout(() => goToModeScreen(), 700);
 }
 
 async function joinAsWorker() {
@@ -1013,9 +1036,9 @@ async function joinAsWorker() {
     return;
   }
 
-  const lockResult = await claimUserLock(lineId, "worker");
-  if (lockResult !== "OK") {
-    setStatus("workerSetupStatus", lockResult === "ALREADY_LOGGED_IN" ? "❌ UŻYTKOWNIK JEST JUŻ ZALOGOWANY na innym urządzeniu/stanowisku." : "❌ Błąd blokady użytkownika: " + lockResult, "bad");
+  const contextResult = await updateUserLockContext(lineId, "worker");
+  if (contextResult !== "OK") {
+    setStatus("workerSetupStatus", "❌ Błąd aktualizacji pracy użytkownika: " + contextResult, "bad");
     sound("bad");
     return;
   }
@@ -1284,6 +1307,30 @@ function stopRefresh() {
   }
 }
 
+async function restoreExistingSession() {
+  const { data } = await supabaseClient.auth.getSession();
+
+  if (!data || !data.session || !data.session.user) return;
+
+  currentUser = data.session.user;
+  currentRole = await getUserRole(currentUser.id);
+
+  if (!hasAccess(currentRole)) {
+    await supabaseClient.auth.signOut();
+    return;
+  }
+
+  el("currentUserLabel").innerText = displayLogin(currentUser.email);
+  el("loginScreen").classList.add("hidden");
+  el("appScreen").classList.remove("hidden");
+
+  await loadLines();
+  await loadMeals();
+  goToModeScreen();
+}
+
+restoreExistingSession();
+
 window.addEventListener("click", () => {
   if (currentMode === "leader" && !el("leaderScreen").classList.contains("hidden")) {
     setTimeout(() => el("leaderBagInput")?.focus(), 50);
@@ -1294,11 +1341,6 @@ window.addEventListener("click", () => {
   }
 });
 
-window.addEventListener("beforeunload", () => {
-  try {
-    supabaseClient.rpc("release_station_user_lock");
-  } catch(e) {}
-});
 </script>
 
 </body>
