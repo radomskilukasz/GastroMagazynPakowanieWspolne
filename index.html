@@ -1190,40 +1190,43 @@ async function loadMembers() {
     return;
   }
 
-  el("membersList").innerHTML = rows.map(row => {
+  el("membersList").innerHTML = rows.map((row, index) => {
     const meals = row.meals || [];
     const mealsText = meals.length ? meals.join(", ") : "brak przydziału";
+
     return `
-      <div class="memberItem">
+      <div class="memberItem" onclick="selectMemberForEditByIndex(${index})" style="cursor:pointer;">
         <div>
           <div class="bagCode">${escapeHtml(displayLogin(row.user_email))}</div>
           <div class="muted">Posiłki: <b>${escapeHtml(mealsText)}</b></div>
         </div>
-        <div class="memberActions">
-          <button onclick="selectMemberForEdit('${escapeHtml(row.user_email)}', ${encodeURIComponent(JSON.stringify(meals))})">Edytuj</button>
+        <div class="memberActions" onclick="event.stopPropagation()">
+          <button class="successBtn" onclick="selectMemberForEditByIndex(${index})">✅ Wybierz / edytuj posiłki</button>
           <button class="danger" onclick="removeMemberMeals('${escapeHtml(row.user_email)}')">Usuń posiłki</button>
         </div>
       </div>
     `;
   }).join("");
+
+  window.stationMembersCache = rows;
 }
 
-function selectMemberForEdit(email, encodedMeals) {
-  selectedMemberEmail = email;
-  el("assignWorkerEmail").value = email;
-  el("assignmentTitle").innerText = "Przydział: " + displayLogin(email);
+function selectMemberForEditByIndex(index) {
+  const row = window.stationMembersCache?.[index];
+  if (!row) return;
+
+  selectedMemberEmail = row.user_email;
+  el("assignWorkerEmail").value = row.user_email;
+  el("assignmentTitle").innerText = "Przydział: " + displayLogin(row.user_email);
   el("assignmentHint").innerText = "Zaznacz posiłki, które ten pracownik ma pakować teraz.";
 
-  let meals = [];
-  try {
-    meals = JSON.parse(decodeURIComponent(encodedMeals));
-  } catch(e) {}
+  const meals = row.meals || [];
 
   [...el("leaderMealsBox").querySelectorAll("input[type='checkbox']")].forEach(input => {
     input.checked = meals.includes(input.value);
   });
 
-  setStatus("assignmentStatus", "Edytujesz przydział dla: " + email, "muted");
+  setStatus("assignmentStatus", "Edytujesz przydział dla: " + row.user_email, "muted");
 }
 
 async function saveSelectedMemberMeals() {
