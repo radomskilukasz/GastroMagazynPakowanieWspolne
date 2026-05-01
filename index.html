@@ -84,7 +84,7 @@
     .warn { color:var(--orange); font-weight:bold; }
     .muted { color:var(--muted); }
 
-    .shell { width:100%; max-width:1500px; margin:0 auto; }
+    .shell { width:100%; max-width:1600px; margin:0 auto; }
 
     .card {
       background:white;
@@ -107,7 +107,6 @@
 
     .logoBox { text-align:center; margin-bottom:15px; }
     .logoBox img { width:90px; height:auto; display:block; margin:0 auto; }
-
     .loginCard h1 { text-align:center; margin:0; font-size:32px; }
 
     .subtitle {
@@ -176,10 +175,11 @@
     .modeCard h2 { font-size:30px; margin-bottom:8px; }
 
     .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
 
     .leaderLayout {
       display:grid;
-      grid-template-columns:minmax(0, 420px) minmax(0, 1fr);
+      grid-template-columns:minmax(0, 420px) minmax(0, 1fr) minmax(0, 440px);
       gap:20px;
       align-items:start;
     }
@@ -200,7 +200,7 @@
       border:3px solid var(--blue);
     }
 
-    .queueList { display:flex; flex-direction:column; gap:12px; }
+    .queueList, .assignmentsList { display:flex; flex-direction:column; gap:12px; }
 
     .queueItem {
       border:1px solid var(--border);
@@ -211,10 +211,20 @@
       grid-template-columns:1fr auto;
       gap:12px;
       align-items:center;
+      cursor:pointer;
+      transition:.15s ease;
     }
 
+    .queueItem:hover { border-color:var(--blue); box-shadow:0 0 0 4px rgba(37,99,235,.10); }
     .queueItem.badBag { border-color:#fecaca; background:#fff1f2; }
     .queueItem.doneBag { border-color:#bbf7d0; background:#f0fdf4; }
+
+    .assignmentItem {
+      border:1px solid var(--border);
+      background:#f9fafb;
+      border-radius:18px;
+      padding:14px;
+    }
 
     .bagCode { font-size:24px; font-weight:bold; word-break:break-word; }
 
@@ -274,19 +284,8 @@
       margin-bottom:22px;
     }
 
-    .taskBag {
-      font-size:42px;
-      font-weight:bold;
-      letter-spacing:-.03em;
-      word-break:break-word;
-    }
-
-    .taskMeal {
-      font-size:26px;
-      font-weight:bold;
-      color:var(--blue);
-      text-align:right;
-    }
+    .taskBag { font-size:42px; font-weight:bold; letter-spacing:-.03em; word-break:break-word; }
+    .taskMeal { font-size:26px; font-weight:bold; color:var(--blue); text-align:right; }
 
     .taskMeta {
       display:grid;
@@ -323,12 +322,7 @@
       font-weight:bold;
     }
 
-    .wrongScanBox .wrongCode {
-      font-size:28px;
-      margin:8px 0 14px;
-      word-break:break-word;
-    }
-
+    .wrongScanBox .wrongCode { font-size:28px; margin:8px 0 14px; word-break:break-word; }
     .taskActions { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
     .nextList { display:flex; flex-direction:column; gap:10px; }
 
@@ -347,8 +341,67 @@
       font-weight:bold;
     }
 
+    .modalBg {
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:999;
+    }
+
+    .modal {
+      background:white;
+      border-radius:24px;
+      padding:28px;
+      width:95%;
+      max-width:1100px;
+      max-height:85vh;
+      overflow:auto;
+      box-shadow:0 25px 80px rgba(0,0,0,.25);
+    }
+
+    .modalHeader {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .modalHeader h2 { margin:0; font-size:30px; }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:17px;
+    }
+
+    th, td {
+      border-bottom:1px solid var(--border);
+      padding:12px;
+      text-align:left;
+      vertical-align:middle;
+    }
+
+    th {
+      background:#f9fafb;
+      color:#374151;
+      font-size:13px;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+
+    tr.doneRow { background:#f0fdf4; }
+    tr.badRow { background:#fff1f2; }
+
+    @media(max-width:1300px){
+      .leaderLayout { grid-template-columns:1fr; }
+    }
+
     @media(max-width:1100px){
-      .leaderLayout, .workerLayout, .grid2, .modeGrid { grid-template-columns:1fr; }
+      .workerLayout, .grid2, .grid3, .modeGrid { grid-template-columns:1fr; }
       .workerLayout { display:flex; flex-direction:column; }
       .mealGrid { grid-template-columns:1fr 1fr; }
     }
@@ -374,10 +427,7 @@
 <body>
 
 <div class="loginCard" id="loginScreen">
-  <div class="logoBox">
-    <img src="logo.png" alt="logo">
-  </div>
-
+  <div class="logoBox"><img src="logo.png" alt="logo"></div>
   <h1>Pakowanie stanowiskowe</h1>
   <p class="subtitle">Zaloguj się, aby utworzyć stanowisko albo dołączyć do istniejącego.</p>
 
@@ -416,17 +466,17 @@
 
   <div id="modeScreen" class="card">
     <h2>Wybierz tryb pracy</h2>
-    <p class="muted">Lider tworzy stanowisko i skanuje torby do kolejki. Pracownik dołącza do stanowiska i skanuje swoje posiłki.</p>
+    <p class="muted">Lider tworzy stanowisko, przydziela pracowników do posiłków i skanuje torby do kolejki.</p>
 
     <div class="modeGrid">
       <div class="modeCard" onclick="showLeaderSetup()">
         <h2>👑 Lider</h2>
-        <p class="muted">Tworzysz stanowisko i dodajesz torby do kolejki. Limit: 10 toreb w obiegu.</p>
+        <p class="muted">Tworzysz stanowisko, przydzielasz posiłki i kontrolujesz kolejkę.</p>
       </div>
 
       <div class="modeCard" onclick="showWorkerSetup()">
         <h2>👷 Pracownik</h2>
-        <p class="muted">Dołączasz do stanowiska i wybierasz jeden lub kilka typów posiłków.</p>
+        <p class="muted">Dołączasz do stanowiska i dostajesz zadania przypisane przez lidera.</p>
       </div>
     </div>
   </div>
@@ -445,7 +495,7 @@
 
   <div id="workerSetupScreen" class="card hidden">
     <h2>👷 Dołącz do stanowiska</h2>
-    <p class="muted">Wybierz aktywne stanowisko i posiłki, które będziesz pakować.</p>
+    <p class="muted">Wybierz stanowisko. Posiłki są przypisane przez lidera.</p>
 
     <div class="grid2">
       <div class="formGroup">
@@ -458,11 +508,6 @@
       </div>
     </div>
 
-    <div class="formGroup">
-      <label>Wybierz posiłki</label>
-      <div id="mealsBox" class="mealGrid"></div>
-    </div>
-
     <button onclick="joinAsWorker()">Dołącz jako pracownik</button>
     <p id="workerSetupStatus" class="statusBox muted"></p>
   </div>
@@ -471,7 +516,7 @@
     <div class="leaderLayout">
       <div class="card">
         <h2>📦 Skanuj torby do kolejki</h2>
-        <p class="muted">Skanuj torby jedna po drugiej. Maksymalnie 10 aktywnych toreb w obiegu.</p>
+        <p class="muted">Kliknij torbę w kolejce, żeby zobaczyć jej aktualną zawartość.</p>
 
         <input id="leaderBagInput" class="scanInput" placeholder="Zeskanuj torbę">
         <p id="leaderStatus" class="statusBox muted"></p>
@@ -486,6 +531,27 @@
         <h2>📋 Kolejka stanowiska</h2>
         <div id="leaderQueue" class="queueList"></div>
       </div>
+
+      <div class="card">
+        <h2>👥 Przydział pracowników</h2>
+        <p class="muted">Lider wybiera, który pracownik pakuje które posiłki.</p>
+
+        <div class="formGroup">
+          <label>Login lub email pracownika</label>
+          <input id="assignWorkerLogin" placeholder="np. JanKowalski">
+        </div>
+
+        <div class="formGroup">
+          <label>Posiłki dla pracownika</label>
+          <div id="leaderMealsBox" class="mealGrid"></div>
+        </div>
+
+        <button onclick="assignWorkerMeals()">💾 Przypisz posiłki</button>
+        <p id="assignmentStatus" class="statusBox muted"></p>
+
+        <h3>Aktualne przydziały</h3>
+        <div id="assignmentsList" class="assignmentsList"></div>
+      </div>
     </div>
   </div>
 
@@ -499,20 +565,29 @@
 
       <div class="card">
         <h2>⏭️ Kolejne zadania</h2>
-        <p class="muted">Lista pokazuje kolejne torby dla wybranych posiłków.</p>
+        <p class="muted">Lista pokazuje kolejne torby z posiłków przypisanych przez lidera.</p>
         <div id="nextTasks" class="nextList"></div>
       </div>
     </div>
   </div>
 </div>
 
-<script>
-const supabaseClient = window.supabase.createClient(
-  "https://lanmmbpqxmenyjwvwpkt.supabase.co",
-  "sb_publishable_sYrinkI1u2zr9uXZwsERNg_HE0wQKsC"
-);
+<div id="bagDetailsModal" class="modalBg hidden">
+  <div class="modal">
+    <div class="modalHeader">
+      <h2 id="bagDetailsTitle">Szczegóły torby</h2>
+      <button class="danger" style="width:auto;" onclick="closeBagDetails()">Zamknij</button>
+    </div>
+    <div id="bagDetailsContent"></div>
+  </div>
+</div>
 
+<script>
+const PROJECT_URL = "https://lanmmbpqxmenyjwvwpkt.supabase.co";
+const PUBLISHABLE_KEY = "sb_publishable_sYrinkI1u2zr9uXZwsERNg_HE0wQKsC";
 const LOGIN_DOMAIN = "@pakowanie.local";
+
+const supabaseClient = window.supabase.createClient(PROJECT_URL, PUBLISHABLE_KEY);
 
 let stationSessionId = getStationSessionId();
 let currentUser = null;
@@ -520,7 +595,6 @@ let currentRole = null;
 let currentMode = null;
 let currentLineId = null;
 let currentLineName = "";
-let selectedMeals = [];
 let taskList = [];
 let currentTask = null;
 let currentBadScan = null;
@@ -528,27 +602,18 @@ let refreshTimer = null;
 let audioCtx = null;
 let isBusy = false;
 
-function el(id) {
-  return document.getElementById(id);
-}
+function el(id) { return document.getElementById(id); }
 
 function getStationSessionId() {
   let id = localStorage.getItem("station_session_id");
-
   if (!id) {
-    if (window.crypto && crypto.randomUUID) {
-      id = crypto.randomUUID();
-    } else {
-      id = String(Date.now()) + "-" + Math.random().toString(16).slice(2);
-    }
-
+    id = window.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + "-" + Math.random().toString(16).slice(2);
     localStorage.setItem("station_session_id", id);
   }
-
   return id;
 }
 
-function getLoginEmail(value) {
+function getEmail(value) {
   const login = String(value || "").trim().toLowerCase();
   if (!login) return "";
   if (login.includes("@")) return login;
@@ -561,11 +626,7 @@ function displayLogin(value) {
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, m => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#039;"
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
   }[m]));
 }
 
@@ -579,7 +640,6 @@ function setStatus(id, text, type = "muted") {
 function sound(type) {
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
     if (type === "ok") playTone(900, 0.08, 0.08);
     if (type === "bad") playTone(180, 0.18, 1.25);
     if (type === "warn") playTone(450, 0.12, 0.18);
@@ -618,12 +678,7 @@ function normalizeCode(value) {
 }
 
 async function getUserRole(userId) {
-  const { data, error } = await supabaseClient
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .single();
-
+  const { data, error } = await supabaseClient.from("user_roles").select("role").eq("user_id", userId).single();
   if (error || !data) return null;
   return data.role;
 }
@@ -632,18 +687,12 @@ function hasAccess(role) {
   return ["worker", "manager", "admin"].includes(role);
 }
 
-el("loginInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") el("passwordInput").focus();
-});
-
-el("passwordInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") login();
-});
+el("loginInput").addEventListener("keydown", e => { if (e.key === "Enter") el("passwordInput").focus(); });
+el("passwordInput").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 
 async function login() {
   setStatus("loginStatus", "⏳ Loguję...", "muted");
-
-  const email = getLoginEmail(el("loginInput").value);
+  const email = getEmail(el("loginInput").value);
   const password = el("passwordInput").value;
 
   if (!email || !password) {
@@ -653,9 +702,7 @@ async function login() {
   }
 
   el("loginButton").disabled = true;
-
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
   el("loginButton").disabled = false;
 
   if (error) {
@@ -674,7 +721,6 @@ async function login() {
   }
 
   const lockResult = await claimLoginLock();
-
   if (lockResult !== "OK") {
     await supabaseClient.auth.signOut();
     setStatus(
@@ -705,17 +751,9 @@ async function logout() {
   location.reload();
 }
 
-
-
 async function claimLoginLock() {
-  const { data, error } = await supabaseClient.rpc("claim_station_login_lock", {
-    client_session_id: stationSessionId
-  });
-
-  if (error) {
-    return "ERROR:" + error.message;
-  }
-
+  const { data, error } = await supabaseClient.rpc("claim_station_login_lock", { client_session_id: stationSessionId });
+  if (error) return "ERROR:" + error.message;
   return data;
 }
 
@@ -725,19 +763,13 @@ async function updateUserLockContext(lineId, mode) {
     target_mode: mode,
     client_session_id: stationSessionId
   });
-
-  if (error) {
-    return "ERROR:" + error.message;
-  }
-
+  if (error) return "ERROR:" + error.message;
   return data;
 }
 
 async function releaseUserLock() {
   try {
-    await supabaseClient.rpc("release_station_user_lock", {
-      client_session_id: stationSessionId
-    });
+    await supabaseClient.rpc("release_station_user_lock", { client_session_id: stationSessionId });
   } catch(e) {}
 }
 
@@ -746,12 +778,11 @@ function hideAllMainScreens() {
     .forEach(id => el(id).classList.add("hidden"));
 }
 
-async function goToModeScreen() {
+function goToModeScreen() {
   stopRefresh();
   currentMode = null;
   currentLineId = null;
   currentLineName = "";
-  selectedMeals = [];
   taskList = [];
   currentTask = null;
   currentBadScan = null;
@@ -773,19 +804,16 @@ async function showWorkerSetup() {
   hideAllMainScreens();
   el("workerSetupScreen").classList.remove("hidden");
   await loadLines();
-  await loadMeals();
 }
 
 async function loadLines() {
   const { data, error } = await supabaseClient.rpc("get_active_station_lines");
-
   if (error) {
     setStatus("workerSetupStatus", "❌ Nie udało się pobrać stanowisk: " + error.message, "bad");
     return;
   }
 
   const rows = data || [];
-
   el("lineSelect").innerHTML = rows.length
     ? rows.map(line => `<option value="${line.id}">${escapeHtml(line.name)}</option>`).join("")
     : `<option value="">Brak aktywnych stanowisk</option>`;
@@ -793,20 +821,19 @@ async function loadLines() {
 
 async function loadMeals() {
   const { data, error } = await supabaseClient.rpc("get_available_meals");
-
   if (error) {
-    el("mealsBox").innerHTML = `<div class="bad">Nie udało się pobrać posiłków: ${escapeHtml(error.message)}</div>`;
+    el("leaderMealsBox").innerHTML = `<div class="bad">Nie udało się pobrać posiłków: ${escapeHtml(error.message)}</div>`;
     return;
   }
 
   const meals = (data || []).map(x => x.meal).filter(Boolean);
 
   if (!meals.length) {
-    el("mealsBox").innerHTML = `<div class="muted">Brak posiłków w planie.</div>`;
+    el("leaderMealsBox").innerHTML = `<div class="muted">Brak posiłków w planie.</div>`;
     return;
   }
 
-  el("mealsBox").innerHTML = meals.map(meal => `
+  el("leaderMealsBox").innerHTML = meals.map(meal => `
     <label class="mealOption">
       <input type="checkbox" value="${escapeHtml(meal)}">
       <span>${escapeHtml(meal)}</span>
@@ -816,7 +843,6 @@ async function loadMeals() {
 
 async function createLine() {
   const name = el("newLineName").value.trim();
-
   if (!name) {
     setStatus("leaderSetupStatus", "❌ Wpisz nazwę stanowiska.", "bad");
     sound("bad");
@@ -825,10 +851,7 @@ async function createLine() {
 
   setStatus("leaderSetupStatus", "⏳ Tworzę stanowisko...", "muted");
 
-  const { data, error } = await supabaseClient.rpc("create_station_line", {
-    line_name: name
-  });
-
+  const { data, error } = await supabaseClient.rpc("create_station_line", { line_name: name });
   if (error) {
     setStatus("leaderSetupStatus", "❌ Błąd tworzenia stanowiska: " + error.message, "bad");
     sound("bad");
@@ -840,7 +863,6 @@ async function createLine() {
   if (result.startsWith("LINE_NAME_EXISTS:")) {
     const existingId = result.replace("LINE_NAME_EXISTS:", "");
     const useExisting = confirm("Stanowisko o takiej nazwie już istnieje.\n\nOK = przejdź do istniejącego stanowiska\nAnuluj = wróć i zmień nazwę");
-
     if (!useExisting) {
       setStatus("leaderSetupStatus", "⚠️ Zmień nazwę stanowiska i spróbuj ponownie.", "warn");
       sound("warn");
@@ -883,14 +905,14 @@ async function enterLeaderScreen(lineId, lineName) {
   el("leaderBagInput").value = "";
   el("leaderBagInput").focus();
 
+  await loadMeals();
   await loadQueue();
+  await loadAssignments();
   startLeaderRefresh();
   sound("ok");
 }
 
-el("leaderBagInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") addLeaderBag();
-});
+el("leaderBagInput").addEventListener("keydown", e => { if (e.key === "Enter") addLeaderBag(); });
 
 async function addLeaderBag(allowDuplicate = false) {
   const bag = el("leaderBagInput").value.trim();
@@ -926,9 +948,6 @@ async function addLeaderBag(allowDuplicate = false) {
   } else if (data === "QUEUE_FULL") {
     setStatus("leaderStatus", "⚠️ Kolejka pełna. Maksymalnie 10 aktywnych toreb.", "warn");
     sound("warn");
-  } else if (data === "LINE_NOT_FOUND") {
-    setStatus("leaderStatus", "❌ Stanowisko nie istnieje albo zostało zamknięte.", "bad");
-    sound("bad");
   } else {
     setStatus("leaderStatus", "❌ Nie udało się dodać torby: " + data, "bad");
     sound("bad");
@@ -940,35 +959,23 @@ async function addLeaderBag(allowDuplicate = false) {
 async function handleDuplicateBag(bag) {
   sound("warn");
 
-  const duplicate = confirm(
-    "Ta torba jest już aktywna w kolejce: " + bag + "\n\n" +
-    "OK = dodaj drugą taką samą torbę\n" +
-    "Anuluj = pokaż kolejną opcję"
-  );
-
+  const duplicate = confirm("Ta torba jest już aktywna w kolejce: " + bag + "\n\nOK = dodaj drugą taką samą torbę\nAnuluj = pokaż kolejną opcję");
   if (duplicate) {
     await addLeaderBag(true);
     return;
   }
 
-  const replace = confirm(
-    "Czy chcesz usunąć poprzedni aktywny zapis tej torby i zastąpić go nowym?\n\n" +
-    "OK = usuń i zastąp\n" +
-    "Anuluj = nic nie rób"
-  );
-
+  const replace = confirm("Czy chcesz usunąć poprzedni aktywny zapis tej torby i zastąpić go nowym?\n\nOK = usuń i zastąp\nAnuluj = nic nie rób");
   if (!replace) {
-    setStatus("leaderStatus", "⚠️ Nie dodano torby. Zeskanuj inną torbę albo wybierz opcję przy duplikacie.", "warn");
+    setStatus("leaderStatus", "⚠️ Nie dodano torby.", "warn");
     return;
   }
 
   isBusy = true;
-
   const { data, error } = await supabaseClient.rpc("replace_bag_on_station_line", {
     target_line_id: currentLineId,
     target_bag_qr: bag
   });
-
   isBusy = false;
 
   if (error || data !== "OK") {
@@ -986,17 +993,13 @@ async function handleDuplicateBag(bag) {
 async function loadQueue() {
   if (!currentLineId) return;
 
-  const { data, error } = await supabaseClient.rpc("get_station_queue", {
-    target_line_id: currentLineId
-  });
-
+  const { data, error } = await supabaseClient.rpc("get_station_queue", { target_line_id: currentLineId });
   if (error) {
     el("leaderQueue").innerHTML = `<div class="bad">Błąd kolejki: ${escapeHtml(error.message)}</div>`;
     return;
   }
 
   const rows = data || [];
-
   if (!rows.length) {
     el("leaderQueue").innerHTML = `<div class="emptyState">Brak toreb w kolejce.</div>`;
     return;
@@ -1004,12 +1007,10 @@ async function loadQueue() {
 
   el("leaderQueue").innerHTML = rows.map(row => {
     const cls = row.status === "done" ? "doneBag" : row.has_error || row.status === "bad" ? "badBag" : "";
-    const statusText = row.status === "queued" ? "w kolejce" :
-      row.status === "in_progress" ? "w trakcie" :
-      row.status === "done" ? "gotowa" : "niepoprawna";
+    const statusText = row.status === "queued" ? "w kolejce" : row.status === "in_progress" ? "w trakcie" : row.status === "done" ? "gotowa" : "niepoprawna";
 
     return `
-      <div class="queueItem ${cls}">
+      <div class="queueItem ${cls}" onclick="openBagDetails('${row.bag_id}')">
         <div>
           <div class="bagCode">${escapeHtml(row.bag_qr)}</div>
           <div class="muted">Status: <b>${statusText}</b> | Pozycja: ${row.queue_position}</div>
@@ -1020,16 +1021,136 @@ async function loadQueue() {
   }).join("");
 }
 
-async function closeCurrentLine() {
+async function openBagDetails(bagId) {
+  const { data, error } = await supabaseClient.rpc("get_station_bag_details", { target_bag_id: bagId });
+
+  if (error) {
+    alert("Błąd pobierania szczegółów torby: " + error.message);
+    return;
+  }
+
+  const rows = data || [];
+  const bagQr = rows[0]?.bag_qr || "-";
+  el("bagDetailsTitle").innerText = "Szczegóły torby: " + bagQr;
+
+  if (!rows.length) {
+    el("bagDetailsContent").innerHTML = `<div class="emptyState">Brak danych torby.</div>`;
+  } else {
+    el("bagDetailsContent").innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Posiłek</th>
+            <th>Kod</th>
+            <th>Rozmiar</th>
+            <th>Oczekiwana tacka</th>
+            <th>Status</th>
+            <th>Zeskanowano</th>
+            <th>Pracownik</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => {
+            const status = r.scan_status || "brak";
+            const cls = status === "ok" ? "doneRow" : ["wrong", "duplicate", "forced_bad"].includes(status) ? "badRow" : "";
+            const label = status === "ok" ? "OK" : status === "wrong" ? "BŁĘDNA" : status === "duplicate" ? "DUPLIKAT" : status === "forced_bad" ? "NIEPOPRAWNA" : "NIE SPAKOWANO";
+            return `
+              <tr class="${cls}">
+                <td><b>${escapeHtml(r.meal || "-")}</b></td>
+                <td>${escapeHtml(r.code || "-")}</td>
+                <td>${escapeHtml(r.size || "-")}</td>
+                <td>${escapeHtml(r.expected_tray_qr || "-")}</td>
+                <td>${label}</td>
+                <td>${escapeHtml(r.scanned_tray_qr || "-")}</td>
+                <td>${escapeHtml(displayLogin(r.scanned_by_email || "-"))}</td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  el("bagDetailsModal").classList.remove("hidden");
+}
+
+function closeBagDetails() {
+  el("bagDetailsModal").classList.add("hidden");
+}
+
+async function assignWorkerMeals() {
+  const email = getEmail(el("assignWorkerLogin").value);
+  const checked = [...el("leaderMealsBox").querySelectorAll("input[type='checkbox']:checked")];
+  const meals = checked.map(x => x.value);
+
+  if (!currentLineId) {
+    setStatus("assignmentStatus", "❌ Brak aktywnego stanowiska.", "bad");
+    return;
+  }
+
+  if (!email) {
+    setStatus("assignmentStatus", "❌ Wpisz login lub email pracownika.", "bad");
+    sound("bad");
+    return;
+  }
+
+  if (!meals.length) {
+    setStatus("assignmentStatus", "❌ Wybierz minimum jeden posiłek.", "bad");
+    sound("bad");
+    return;
+  }
+
+  setStatus("assignmentStatus", "⏳ Zapisuję przydział...", "muted");
+
+  const { data, error } = await supabaseClient.rpc("assign_station_worker_meals", {
+    target_line_id: currentLineId,
+    worker_email: email,
+    target_meals: meals
+  });
+
+  if (error || data !== "OK") {
+    setStatus("assignmentStatus", "❌ Nie udało się zapisać przydziału: " + (error?.message || data), "bad");
+    sound("bad");
+    return;
+  }
+
+  setStatus("assignmentStatus", "✅ Przypisano posiłki dla: " + email, "ok");
+  el("assignWorkerLogin").value = "";
+  checked.forEach(x => x.checked = false);
+  await loadAssignments();
+  sound("ok");
+}
+
+async function loadAssignments() {
   if (!currentLineId) return;
 
+  const { data, error } = await supabaseClient.rpc("get_station_line_assignments", { target_line_id: currentLineId });
+
+  if (error) {
+    el("assignmentsList").innerHTML = `<div class="bad">Błąd pobierania przydziałów: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+
+  const rows = data || [];
+  if (!rows.length) {
+    el("assignmentsList").innerHTML = `<div class="muted">Brak przydziałów.</div>`;
+    return;
+  }
+
+  el("assignmentsList").innerHTML = rows.map(r => `
+    <div class="assignmentItem">
+      <b>${escapeHtml(displayLogin(r.user_email))}</b><br>
+      <span class="muted">${escapeHtml((r.meals || []).join(", "))}</span>
+    </div>
+  `).join("");
+}
+
+async function closeCurrentLine() {
+  if (!currentLineId) return;
   const ok = confirm("Zamknąć stanowisko: " + currentLineName + "?");
   if (!ok) return;
 
-  const { error } = await supabaseClient.rpc("close_station_line", {
-    target_line_id: currentLineId
-  });
-
+  const { error } = await supabaseClient.rpc("close_station_line", { target_line_id: currentLineId });
   if (error) {
     setStatus("leaderStatus", "❌ Nie udało się zamknąć stanowiska: " + error.message, "bad");
     sound("bad");
@@ -1046,17 +1167,22 @@ async function joinAsWorker() {
   const lineOption = el("lineSelect").selectedOptions[0];
   const lineName = lineOption ? lineOption.textContent : "";
 
-  const checked = [...el("mealsBox").querySelectorAll("input[type='checkbox']:checked")];
-  const meals = checked.map(x => x.value);
-
   if (!lineId) {
     setStatus("workerSetupStatus", "❌ Wybierz stanowisko.", "bad");
     sound("bad");
     return;
   }
 
-  if (!meals.length) {
-    setStatus("workerSetupStatus", "❌ Wybierz przynajmniej jeden posiłek.", "bad");
+  const { data: assigned, error: assignError } = await supabaseClient.rpc("get_my_station_assignment", { target_line_id: lineId });
+
+  if (assignError) {
+    setStatus("workerSetupStatus", "❌ Błąd sprawdzania przydziału: " + assignError.message, "bad");
+    sound("bad");
+    return;
+  }
+
+  if (!assigned || !assigned.length || !assigned[0].meals || !assigned[0].meals.length) {
+    setStatus("workerSetupStatus", "❌ Lider nie przypisał Ci posiłków na tym stanowisku.", "bad");
     sound("bad");
     return;
   }
@@ -1070,7 +1196,6 @@ async function joinAsWorker() {
 
   currentLineId = lineId;
   currentLineName = lineName;
-  selectedMeals = meals;
   currentMode = "worker";
 
   el("currentLineLabel").innerText = currentLineName;
@@ -1085,12 +1210,9 @@ async function joinAsWorker() {
 }
 
 async function loadTasks() {
-  if (!currentLineId || !selectedMeals.length || isBusy || currentBadScan) return;
+  if (!currentLineId || isBusy || currentBadScan) return;
 
-  const { data, error } = await supabaseClient.rpc("get_station_tasks", {
-    target_line_id: currentLineId,
-    target_meals: selectedMeals
-  });
+  const { data, error } = await supabaseClient.rpc("get_station_tasks", { target_line_id: currentLineId });
 
   if (error) {
     el("currentTaskBox").innerHTML = `<div class="emptyState bad">Błąd pobierania zadań: ${escapeHtml(error.message)}</div>`;
@@ -1099,7 +1221,6 @@ async function loadTasks() {
 
   taskList = data || [];
   currentTask = taskList[0] || null;
-
   renderWorkerTask();
 }
 
@@ -1135,18 +1256,9 @@ function renderWorkerTask(errorMessage = "") {
     </div>
 
     <div class="taskMeta">
-      <div class="metaBox">
-        <div class="metaLabel">Kod</div>
-        <div class="metaValue">${escapeHtml(currentTask.code || "-")}</div>
-      </div>
-      <div class="metaBox">
-        <div class="metaLabel">Rozmiar</div>
-        <div class="metaValue">${escapeHtml(currentTask.size || "-")}</div>
-      </div>
-      <div class="metaBox">
-        <div class="metaLabel">QR tacki</div>
-        <div class="metaValue">${escapeHtml(currentTask.tray_qr || "-")}</div>
-      </div>
+      <div class="metaBox"><div class="metaLabel">Kod</div><div class="metaValue">${escapeHtml(currentTask.code || "-")}</div></div>
+      <div class="metaBox"><div class="metaLabel">Rozmiar</div><div class="metaValue">${escapeHtml(currentTask.size || "-")}</div></div>
+      <div class="metaBox"><div class="metaLabel">QR tacki</div><div class="metaValue">${escapeHtml(currentTask.tray_qr || "-")}</div></div>
     </div>
 
     <div class="metaBox" style="margin-bottom:18px;">
@@ -1168,9 +1280,7 @@ function renderWorkerTask(errorMessage = "") {
   const scanInput = el("trayScanInput");
   if (scanInput && !currentBadScan) {
     scanInput.focus();
-    scanInput.addEventListener("keydown", e => {
-      if (e.key === "Enter") scanCurrentTray();
-    });
+    scanInput.addEventListener("keydown", e => { if (e.key === "Enter") scanCurrentTray(); });
   }
 
   renderNextTasks();
@@ -1178,7 +1288,6 @@ function renderWorkerTask(errorMessage = "") {
 
 function renderNextTasks() {
   const next = taskList.slice(1, 8);
-
   if (!next.length) {
     el("nextTasks").innerHTML = `<div class="muted">Brak kolejnych zadań.</div>`;
     return;
@@ -1197,11 +1306,9 @@ async function scanCurrentTray() {
 
   const input = el("trayScanInput");
   const scannedValue = input.value.trim();
-
   if (!scannedValue) return;
 
   isBusy = true;
-
   const scanned = normalizeCode(scannedValue);
   const expected = normalizeCode(currentTask.tray_qr);
 
@@ -1229,12 +1336,7 @@ async function scanCurrentTray() {
   }
 
   if (data === "WRONG" || data === "DUPLICATE") {
-    currentBadScan = {
-      scannedValue,
-      normalizedValue: scanned,
-      type: data
-    };
-
+    currentBadScan = { scannedValue, normalizedValue: scanned, type: data };
     renderWorkerTask(data === "WRONG"
       ? "❌ Zła tacka. Usuń błędną tackę i zeskanuj prawidłową albo zostaw torbę jako niepoprawną."
       : "⚠️ Duplikat tacki. Usuń błędną tackę i zeskanuj prawidłową albo zostaw torbę jako niepoprawną."
@@ -1249,7 +1351,6 @@ async function scanCurrentTray() {
 
 async function removeBadScanAndRetry() {
   if (!currentTask || !currentBadScan || isBusy) return;
-
   isBusy = true;
 
   const { data, error } = await supabaseClient.rpc("remove_station_bad_scan", {
@@ -1301,23 +1402,22 @@ async function forceBadCurrentTask() {
 async function tryCloseCurrentBag() {
   if (!currentTask) return;
 
-  const { data, error } = await supabaseClient.rpc("try_close_station_bag", {
-    target_bag_id: currentTask.bag_id
-  });
+  const { data, error } = await supabaseClient.rpc("try_close_station_bag", { target_bag_id: currentTask.bag_id });
 
   if (error) {
     console.error("Błąd zamykania torby:", error);
     return;
   }
 
-  if (data === "POPRAWNA" || data === "NIEPOPRAWNA") {
-    sound("done");
-  }
+  if (data === "POPRAWNA" || data === "NIEPOPRAWNA") sound("done");
 }
 
 function startLeaderRefresh() {
   stopRefresh();
-  refreshTimer = setInterval(loadQueue, 3000);
+  refreshTimer = setInterval(async () => {
+    await loadQueue();
+    await loadAssignments();
+  }, 3000);
 }
 
 function startWorkerRefresh() {
@@ -1334,7 +1434,6 @@ function stopRefresh() {
 
 async function restoreExistingSession() {
   const { data } = await supabaseClient.auth.getSession();
-
   if (!data || !data.session || !data.session.user) return;
 
   currentUser = data.session.user;
@@ -1346,18 +1445,11 @@ async function restoreExistingSession() {
   }
 
   const lockResult = await claimLoginLock();
-
   if (lockResult !== "OK") {
     await supabaseClient.auth.signOut();
     el("loginScreen").classList.remove("hidden");
     el("appScreen").classList.add("hidden");
-    setStatus(
-      "loginStatus",
-      lockResult === "ALREADY_LOGGED_IN"
-        ? "❌ UŻYTKOWNIK JEST JUŻ AKTYWNY NA INNYM URZĄDZENIU."
-        : "❌ Błąd blokady użytkownika: " + lockResult,
-      "bad"
-    );
+    setStatus("loginStatus", lockResult === "ALREADY_LOGGED_IN" ? "❌ UŻYTKOWNIK JEST JUŻ AKTYWNY NA INNYM URZĄDZENIU." : "❌ Błąd blokady użytkownika: " + lockResult, "bad");
     return;
   }
 
@@ -1376,12 +1468,10 @@ window.addEventListener("click", () => {
   if (currentMode === "leader" && !el("leaderScreen").classList.contains("hidden")) {
     setTimeout(() => el("leaderBagInput")?.focus(), 50);
   }
-
   if (currentMode === "worker" && !el("workerScreen").classList.contains("hidden") && !currentBadScan) {
     setTimeout(() => el("trayScanInput")?.focus(), 50);
   }
 });
-
 </script>
 
 </body>
