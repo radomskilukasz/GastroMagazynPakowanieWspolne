@@ -84,11 +84,7 @@
     .warn { color:var(--orange); font-weight:bold; }
     .muted { color:var(--muted); }
 
-    .shell {
-      width:100%;
-      max-width:1500px;
-      margin:0 auto;
-    }
+    .shell { width:100%; max-width:1500px; margin:0 auto; }
 
     .card {
       background:white;
@@ -109,23 +105,10 @@
       box-shadow:var(--shadow);
     }
 
-    .logoBox {
-      text-align:center;
-      margin-bottom:15px;
-    }
+    .logoBox { text-align:center; margin-bottom:15px; }
+    .logoBox img { width:90px; height:auto; display:block; margin:0 auto; }
 
-    .logoBox img {
-      width:90px;
-      height:auto;
-      display:block;
-      margin:0 auto;
-    }
-
-    .loginCard h1 {
-      text-align:center;
-      margin:0;
-      font-size:32px;
-    }
+    .loginCard h1 { text-align:center; margin:0; font-size:32px; }
 
     .subtitle {
       text-align:center;
@@ -167,39 +150,14 @@
       flex-wrap:wrap;
     }
 
-    .topbarTitle {
-      display:flex;
-      gap:18px;
-      align-items:center;
-    }
+    .topbarTitle { display:flex; gap:18px; align-items:center; }
+    .topbarLogo { width:70px; height:auto; }
+    .topbar h1 { margin:0; font-size:36px; letter-spacing:-.03em; }
 
-    .topbarLogo {
-      width:70px;
-      height:auto;
-    }
+    .topbarActions { display:flex; gap:10px; flex-wrap:wrap; }
+    .topbarActions button { width:auto; min-width:160px; }
 
-    .topbar h1 {
-      margin:0;
-      font-size:36px;
-      letter-spacing:-.03em;
-    }
-
-    .topbarActions {
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .topbarActions button {
-      width:auto;
-      min-width:160px;
-    }
-
-    .modeGrid {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:18px;
-    }
+    .modeGrid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
 
     .modeCard {
       border:2px solid var(--border);
@@ -215,16 +173,9 @@
       box-shadow:0 0 0 4px rgba(37,99,235,.12);
     }
 
-    .modeCard h2 {
-      font-size:30px;
-      margin-bottom:8px;
-    }
+    .modeCard h2 { font-size:30px; margin-bottom:8px; }
 
-    .grid2 {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:18px;
-    }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
 
     .leaderLayout {
       display:grid;
@@ -249,11 +200,7 @@
       border:3px solid var(--blue);
     }
 
-    .queueList {
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
+    .queueList { display:flex; flex-direction:column; gap:12px; }
 
     .queueItem {
       border:1px solid var(--border);
@@ -266,21 +213,10 @@
       align-items:center;
     }
 
-    .queueItem.badBag {
-      border-color:#fecaca;
-      background:#fff1f2;
-    }
+    .queueItem.badBag { border-color:#fecaca; background:#fff1f2; }
+    .queueItem.doneBag { border-color:#bbf7d0; background:#f0fdf4; }
 
-    .queueItem.doneBag {
-      border-color:#bbf7d0;
-      background:#f0fdf4;
-    }
-
-    .bagCode {
-      font-size:24px;
-      font-weight:bold;
-      word-break:break-word;
-    }
+    .bagCode { font-size:24px; font-weight:bold; word-break:break-word; }
 
     .progressPill {
       display:inline-block;
@@ -309,11 +245,7 @@
       cursor:pointer;
     }
 
-    .mealOption input {
-      width:auto;
-      min-height:auto;
-      transform:scale(1.25);
-    }
+    .mealOption input { width:auto; min-height:auto; transform:scale(1.25); }
 
     .taskCard {
       border:2px solid var(--border);
@@ -379,24 +311,26 @@
       margin-bottom:5px;
     }
 
-    .metaValue {
-      font-size:20px;
+    .metaValue { font-size:20px; font-weight:bold; word-break:break-word; }
+
+    .wrongScanBox {
+      background:#fee2e2;
+      border:2px solid #fecaca;
+      color:#991b1b;
+      border-radius:18px;
+      padding:16px;
+      margin-top:14px;
       font-weight:bold;
+    }
+
+    .wrongScanBox .wrongCode {
+      font-size:28px;
+      margin:8px 0 14px;
       word-break:break-word;
     }
 
-    .taskActions {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-top:12px;
-    }
-
-    .nextList {
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
+    .taskActions { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+    .nextList { display:flex; flex-direction:column; gap:10px; }
 
     .nextItem {
       border:1px solid var(--border);
@@ -414,21 +348,9 @@
     }
 
     @media(max-width:1100px){
-      .leaderLayout,
-      .workerLayout,
-      .grid2,
-      .modeGrid {
-        grid-template-columns:1fr;
-      }
-
-      .workerLayout {
-        display:flex;
-        flex-direction:column;
-      }
-
-      .mealGrid {
-        grid-template-columns:1fr 1fr;
-      }
+      .leaderLayout, .workerLayout, .grid2, .modeGrid { grid-template-columns:1fr; }
+      .workerLayout { display:flex; flex-direction:column; }
+      .mealGrid { grid-template-columns:1fr 1fr; }
     }
 
     @media(max-width:700px){
@@ -600,6 +522,7 @@ let currentLineName = "";
 let selectedMeals = [];
 let taskList = [];
 let currentTask = null;
+let currentBadScan = null;
 let refreshTimer = null;
 let audioCtx = null;
 let isBusy = false;
@@ -739,33 +662,50 @@ async function login() {
 
   await loadLines();
   await loadMeals();
-  goToModeScreen();
+  goToModeScreen(false);
   sound("ok");
 }
 
 async function logout() {
+  await releaseUserLock();
   await supabaseClient.auth.signOut();
   location.reload();
 }
 
-function hideAllMainScreens() {
-  [
-    "modeScreen",
-    "leaderSetupScreen",
-    "workerSetupScreen",
-    "leaderScreen",
-    "workerScreen"
-  ].forEach(id => el(id).classList.add("hidden"));
+async function claimUserLock(lineId, mode) {
+  const { data, error } = await supabaseClient.rpc("claim_station_user_lock", {
+    target_line_id: lineId,
+    target_mode: mode
+  });
+
+  if (error) {
+    return "ERROR:" + error.message;
+  }
+
+  return data;
 }
 
-function goToModeScreen() {
+async function releaseUserLock() {
+  try {
+    await supabaseClient.rpc("release_station_user_lock");
+  } catch(e) {}
+}
+
+function hideAllMainScreens() {
+  ["modeScreen", "leaderSetupScreen", "workerSetupScreen", "leaderScreen", "workerScreen"]
+    .forEach(id => el(id).classList.add("hidden"));
+}
+
+async function goToModeScreen(shouldRelease = true) {
   stopRefresh();
+  if (shouldRelease) await releaseUserLock();
   currentMode = null;
   currentLineId = null;
   currentLineName = "";
   selectedMeals = [];
   taskList = [];
   currentTask = null;
+  currentBadScan = null;
   el("currentLineLabel").innerText = "brak";
   el("mainTitle").innerText = "Pakowanie stanowiskowe";
   hideAllMainScreens();
@@ -846,8 +786,42 @@ async function createLine() {
     return;
   }
 
-  currentLineId = data;
-  currentLineName = name;
+  const result = String(data || "");
+
+  if (result.startsWith("LINE_NAME_EXISTS:")) {
+    const existingId = result.replace("LINE_NAME_EXISTS:", "");
+    const useExisting = confirm("Stanowisko o takiej nazwie już istnieje.\n\nOK = przejdź do istniejącego stanowiska\nAnuluj = wróć i zmień nazwę");
+
+    if (!useExisting) {
+      setStatus("leaderSetupStatus", "⚠️ Zmień nazwę stanowiska i spróbuj ponownie.", "warn");
+      sound("warn");
+      return;
+    }
+
+    const lock = await claimUserLock(existingId, "leader");
+    if (lock !== "OK") {
+      setStatus("leaderSetupStatus", lock === "ALREADY_LOGGED_IN" ? "❌ UŻYTKOWNIK JEST JUŻ ZALOGOWANY na innym urządzeniu/stanowisku." : "❌ Błąd blokady użytkownika: " + lock, "bad");
+      sound("bad");
+      return;
+    }
+
+    enterLeaderScreen(existingId, name);
+    return;
+  }
+
+  const lockResult = await claimUserLock(result, "leader");
+  if (lockResult !== "OK") {
+    setStatus("leaderSetupStatus", lockResult === "ALREADY_LOGGED_IN" ? "❌ UŻYTKOWNIK JEST JUŻ ZALOGOWANY na innym urządzeniu/stanowisku." : "❌ Błąd blokady użytkownika: " + lockResult, "bad");
+    sound("bad");
+    return;
+  }
+
+  enterLeaderScreen(result, name);
+}
+
+async function enterLeaderScreen(lineId, lineName) {
+  currentLineId = lineId;
+  currentLineName = lineName;
   currentMode = "leader";
 
   el("currentLineLabel").innerText = currentLineName;
@@ -869,7 +843,7 @@ el("leaderBagInput").addEventListener("keydown", e => {
   if (e.key === "Enter") addLeaderBag();
 });
 
-async function addLeaderBag() {
+async function addLeaderBag(allowDuplicate = false) {
   const bag = el("leaderBagInput").value.trim();
   if (!bag || !currentLineId || isBusy) return;
 
@@ -878,7 +852,8 @@ async function addLeaderBag() {
 
   const { data, error } = await supabaseClient.rpc("add_bag_to_station_line", {
     target_line_id: currentLineId,
-    target_bag_qr: bag
+    target_bag_qr: bag,
+    allow_duplicate: allowDuplicate
   });
 
   isBusy = false;
@@ -894,6 +869,8 @@ async function addLeaderBag() {
     el("leaderBagInput").value = "";
     await loadQueue();
     sound("ok");
+  } else if (data === "BAG_ALREADY_ACTIVE") {
+    await handleDuplicateBag(bag);
   } else if (data === "BAG_NOT_FOUND") {
     setStatus("leaderStatus", "❌ Brak torby w planie: " + bag, "bad");
     sound("bad");
@@ -909,6 +886,52 @@ async function addLeaderBag() {
   }
 
   el("leaderBagInput").focus();
+}
+
+async function handleDuplicateBag(bag) {
+  sound("warn");
+
+  const duplicate = confirm(
+    "Ta torba jest już aktywna w kolejce: " + bag + "\n\n" +
+    "OK = dodaj drugą taką samą torbę\n" +
+    "Anuluj = pokaż kolejną opcję"
+  );
+
+  if (duplicate) {
+    await addLeaderBag(true);
+    return;
+  }
+
+  const replace = confirm(
+    "Czy chcesz usunąć poprzedni aktywny zapis tej torby i zastąpić go nowym?\n\n" +
+    "OK = usuń i zastąp\n" +
+    "Anuluj = nic nie rób"
+  );
+
+  if (!replace) {
+    setStatus("leaderStatus", "⚠️ Nie dodano torby. Zeskanuj inną torbę albo wybierz opcję przy duplikacie.", "warn");
+    return;
+  }
+
+  isBusy = true;
+
+  const { data, error } = await supabaseClient.rpc("replace_bag_on_station_line", {
+    target_line_id: currentLineId,
+    target_bag_qr: bag
+  });
+
+  isBusy = false;
+
+  if (error || data !== "OK") {
+    setStatus("leaderStatus", "❌ Nie udało się zastąpić torby: " + (error?.message || data), "bad");
+    sound("bad");
+    return;
+  }
+
+  setStatus("leaderStatus", "✅ Zastąpiono poprzedni zapis torby: " + bag, "ok");
+  el("leaderBagInput").value = "";
+  await loadQueue();
+  sound("ok");
 }
 
 async function loadQueue() {
@@ -964,12 +987,13 @@ async function closeCurrentLine() {
     return;
   }
 
+  await releaseUserLock();
   setStatus("leaderStatus", "✅ Stanowisko zamknięte.", "ok");
   sound("done");
-  setTimeout(goToModeScreen, 700);
+  setTimeout(() => goToModeScreen(false), 700);
 }
 
-function joinAsWorker() {
+async function joinAsWorker() {
   const lineId = el("lineSelect").value;
   const lineOption = el("lineSelect").selectedOptions[0];
   const lineName = lineOption ? lineOption.textContent : "";
@@ -985,6 +1009,13 @@ function joinAsWorker() {
 
   if (!meals.length) {
     setStatus("workerSetupStatus", "❌ Wybierz przynajmniej jeden posiłek.", "bad");
+    sound("bad");
+    return;
+  }
+
+  const lockResult = await claimUserLock(lineId, "worker");
+  if (lockResult !== "OK") {
+    setStatus("workerSetupStatus", lockResult === "ALREADY_LOGGED_IN" ? "❌ UŻYTKOWNIK JEST JUŻ ZALOGOWANY na innym urządzeniu/stanowisku." : "❌ Błąd blokady użytkownika: " + lockResult, "bad");
     sound("bad");
     return;
   }
@@ -1006,7 +1037,7 @@ function joinAsWorker() {
 }
 
 async function loadTasks() {
-  if (!currentLineId || !selectedMeals.length || isBusy) return;
+  if (!currentLineId || !selectedMeals.length || isBusy || currentBadScan) return;
 
   const { data, error } = await supabaseClient.rpc("get_station_tasks", {
     target_line_id: currentLineId,
@@ -1033,6 +1064,17 @@ function renderWorkerTask(errorMessage = "") {
   }
 
   el("currentTaskBox").className = errorMessage ? "taskCard errorState" : "taskCard";
+
+  const badScanHtml = currentBadScan ? `
+    <div class="wrongScanBox">
+      Nieprawidłowa tacka zeskanowana do tej torby:
+      <div class="wrongCode">${escapeHtml(currentBadScan.scannedValue)}</div>
+      <div class="taskActions">
+        <button class="lightBtn" onclick="removeBadScanAndRetry()">Usuń błędną tackę i skanuj ponownie</button>
+        <button class="danger" onclick="forceBadCurrentTask()">Zostaw i zapakuj jako niepoprawną</button>
+      </div>
+    </div>
+  ` : "";
 
   el("currentTaskBox").innerHTML = `
     <div class="taskHeader">
@@ -1064,9 +1106,10 @@ function renderWorkerTask(errorMessage = "") {
       <div class="metaValue">${escapeHtml(currentTask.dish_name || "-")}</div>
     </div>
 
-    <input id="trayScanInput" class="scanInput" placeholder="Zeskanuj tackę">
+    <input id="trayScanInput" class="scanInput" placeholder="Zeskanuj tackę" ${currentBadScan ? "disabled" : ""}>
 
     ${errorMessage ? `<p class="statusBox bad">${escapeHtml(errorMessage)}</p>` : `<p class="statusBox muted">Zeskanuj tackę dla tej konkretnej torby.</p>`}
+    ${badScanHtml}
 
     <div class="taskActions">
       <button class="danger" onclick="forceBadCurrentTask()">Zapakuj jako niepoprawną</button>
@@ -1075,10 +1118,12 @@ function renderWorkerTask(errorMessage = "") {
   `;
 
   const scanInput = el("trayScanInput");
-  scanInput.focus();
-  scanInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") scanCurrentTray();
-  });
+  if (scanInput && !currentBadScan) {
+    scanInput.focus();
+    scanInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") scanCurrentTray();
+    });
+  }
 
   renderNextTasks();
 }
@@ -1100,7 +1145,7 @@ function renderNextTasks() {
 }
 
 async function scanCurrentTray() {
-  if (!currentTask || isBusy) return;
+  if (!currentTask || isBusy || currentBadScan) return;
 
   const input = el("trayScanInput");
   const scannedValue = input.value.trim();
@@ -1128,26 +1173,53 @@ async function scanCurrentTray() {
   }
 
   if (data === "OK") {
+    currentBadScan = null;
     sound("ok");
     await tryCloseCurrentBag();
     await loadTasks();
     return;
   }
 
-  if (data === "WRONG") {
-    renderWorkerTask("❌ Zła tacka: " + scannedValue + ". Popraw skan albo kliknij: Zapakuj jako niepoprawną.");
-    sound("bad");
-    return;
-  }
+  if (data === "WRONG" || data === "DUPLICATE") {
+    currentBadScan = {
+      scannedValue,
+      normalizedValue: scanned,
+      type: data
+    };
 
-  if (data === "DUPLICATE") {
-    renderWorkerTask("⚠️ Duplikat tacki: " + scannedValue + ". Popraw skan albo kliknij: Zapakuj jako niepoprawną.");
+    renderWorkerTask(data === "WRONG"
+      ? "❌ Zła tacka. Usuń błędną tackę i zeskanuj prawidłową albo zostaw torbę jako niepoprawną."
+      : "⚠️ Duplikat tacki. Usuń błędną tackę i zeskanuj prawidłową albo zostaw torbę jako niepoprawną."
+    );
     sound("bad");
     return;
   }
 
   renderWorkerTask("❌ Nieoczekiwany status: " + data);
   sound("bad");
+}
+
+async function removeBadScanAndRetry() {
+  if (!currentTask || !currentBadScan || isBusy) return;
+
+  isBusy = true;
+
+  const { data, error } = await supabaseClient.rpc("remove_station_bad_scan", {
+    target_bag_id: currentTask.bag_id,
+    target_tray_qr: currentBadScan.normalizedValue
+  });
+
+  isBusy = false;
+
+  if (error || data !== "OK") {
+    renderWorkerTask("❌ Nie udało się usunąć błędnego skanu: " + (error?.message || data));
+    sound("bad");
+    return;
+  }
+
+  currentBadScan = null;
+  renderWorkerTask("Usunięto błędny skan. Zeskanuj prawidłową tackę.");
+  sound("warn");
 }
 
 async function forceBadCurrentTask() {
@@ -1172,6 +1244,7 @@ async function forceBadCurrentTask() {
     return;
   }
 
+  currentBadScan = null;
   sound("warn");
   await tryCloseCurrentBag();
   await loadTasks();
@@ -1216,9 +1289,15 @@ window.addEventListener("click", () => {
     setTimeout(() => el("leaderBagInput")?.focus(), 50);
   }
 
-  if (currentMode === "worker" && !el("workerScreen").classList.contains("hidden")) {
+  if (currentMode === "worker" && !el("workerScreen").classList.contains("hidden") && !currentBadScan) {
     setTimeout(() => el("trayScanInput")?.focus(), 50);
   }
+});
+
+window.addEventListener("beforeunload", () => {
+  try {
+    supabaseClient.rpc("release_station_user_lock");
+  } catch(e) {}
 });
 </script>
 
