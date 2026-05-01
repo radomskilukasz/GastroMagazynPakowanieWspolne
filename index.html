@@ -514,6 +514,7 @@ const supabaseClient = window.supabase.createClient(
 
 const LOGIN_DOMAIN = "@pakowanie.local";
 
+let stationSessionId = getStationSessionId();
 let currentUser = null;
 let currentRole = null;
 let currentMode = null;
@@ -529,6 +530,22 @@ let isBusy = false;
 
 function el(id) {
   return document.getElementById(id);
+}
+
+function getStationSessionId() {
+  let id = localStorage.getItem("station_session_id");
+
+  if (!id) {
+    if (window.crypto && crypto.randomUUID) {
+      id = crypto.randomUUID();
+    } else {
+      id = String(Date.now()) + "-" + Math.random().toString(16).slice(2);
+    }
+
+    localStorage.setItem("station_session_id", id);
+  }
+
+  return id;
 }
 
 function getLoginEmail(value) {
@@ -663,7 +680,7 @@ async function login() {
     setStatus(
       "loginStatus",
       lockResult === "ALREADY_LOGGED_IN"
-        ? "❌ UŻYTKOWNIK JEST JUŻ ZALOGOWANY na innym urządzeniu. Najpierw wyloguj go ręcznie."
+        ? "❌ UŻYTKOWNIK JEST JUŻ AKTYWNY NA INNYM URZĄDZENIU."
         : "❌ Błąd blokady użytkownika: " + lockResult,
       "bad"
     );
@@ -688,30 +705,12 @@ async function logout() {
   location.reload();
 }
 
-function releaseLockOnPageExit() {
-  try {
-    const sessionRaw = localStorage.getItem("sb-lanmmbpqxmenyjwvwpkt-auth-token");
-    if (!sessionRaw) return;
 
-    const sessionData = JSON.parse(sessionRaw);
-    const token = sessionData?.access_token || sessionData?.currentSession?.access_token;
-    if (!token) return;
-
-    fetch("https://lanmmbpqxmenyjwvwpkt.supabase.co/rest/v1/rpc/release_station_user_lock", {
-      method: "POST",
-      keepalive: true,
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": "sb_publishable_sYrinkI1u2zr9uXZwsERNg_HE0wQKsC",
-        "Authorization": "Bearer " + token
-      },
-      body: "{}"
-    });
-  } catch(e) {}
-}
 
 async function claimLoginLock() {
-  const { data, error } = await supabaseClient.rpc("claim_station_login_lock");
+  const { data, error } = await supabaseClient.rpc("claim_station_login_lock", {
+    client_session_id: stationSessionId
+  });
 
   if (error) {
     return "ERROR:" + error.message;
@@ -723,7 +722,8 @@ async function claimLoginLock() {
 async function updateUserLockContext(lineId, mode) {
   const { data, error } = await supabaseClient.rpc("update_station_user_lock_context", {
     target_line_id: lineId,
-    target_mode: mode
+    target_mode: mode,
+    client_session_id: stationSessionId
   });
 
   if (error) {
@@ -735,7 +735,9 @@ async function updateUserLockContext(lineId, mode) {
 
 async function releaseUserLock() {
   try {
-    await supabaseClient.rpc("release_station_user_lock");
+    await supabaseClient.rpc("release_station_user_lock", {
+      client_session_id: stationSessionId
+    });
   } catch(e) {}
 }
 
@@ -1330,36 +1332,45 @@ function stopRefresh() {
   }
 }
 
-async function clearSessionAfterRefresh() {
+async function restoreExistingSession() {
   const { data } = await supabaseClient.auth.getSession();
 
   if (!data || !data.session || !data.session.user) return;
 
-  try {
-    await releaseUserLock();
-  } catch(e) {}
+  currentUser = data.session.user;
+  currentRole = await getUserRole(currentUser.id);
 
-  await supabaseClient.auth.signOut();
+  if (!hasAccess(currentRole)) {
+    await supabaseClient.auth.signOut();
+    return;
+  }
 
-  currentUser = null;
-  currentRole = null;
-  currentMode = null;
-  currentLineId = null;
-  currentLineName = "";
-  selectedMeals = [];
-  taskList = [];
-  currentTask = null;
-  currentBadScan = null;
+  const lockResult = await claimLoginLock();
 
-  el("loginScreen").classList.remove("hidden");
-  el("appScreen").classList.add("hidden");
-  setStatus("loginStatus", "Odświeżenie strony zakończyło poprzednią sesję. Zaloguj się ponownie.", "warn");
+  if (lockResult !== "OK") {
+    await supabaseClient.auth.signOut();
+    el("loginScreen").classList.remove("hidden");
+    el("appScreen").classList.add("hidden");
+    setStatus(
+      "loginStatus",
+      lockResult === "ALREADY_LOGGED_IN"
+        ? "❌ UŻYTKOWNIK JEST JUŻ AKTYWNY NA INNYM URZĄDZENIU."
+        : "❌ Błąd blokady użytkownika: " + lockResult,
+      "bad"
+    );
+    return;
+  }
+
+  el("currentUserLabel").innerText = displayLogin(currentUser.email);
+  el("loginScreen").classList.add("hidden");
+  el("appScreen").classList.remove("hidden");
+
+  await loadLines();
+  await loadMeals();
+  goToModeScreen();
 }
 
-clearSessionAfterRefresh();
-
-window.addEventListener("pagehide", releaseLockOnPageExit);
-window.addEventListener("beforeunload", releaseLockOnPageExit);
+restoreExistingSession();
 
 window.addEventListener("click", () => {
   if (currentMode === "leader" && !el("leaderScreen").classList.contains("hidden")) {
