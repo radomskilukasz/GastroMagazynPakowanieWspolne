@@ -1048,8 +1048,18 @@ async function createLine() {
 
   if (result.startsWith("LINE_NAME_EXISTS:")) {
     const existingId = result.replace("LINE_NAME_EXISTS:", "");
-    const useExisting = confirm("Stanowisko o takiej nazwie już istnieje.\n\nOK = przejdź do istniejącego stanowiska\nAnuluj = wróć i zmień nazwę");
-    if (!useExisting) {
+
+    const choice = await showChoiceModal({
+      title: "⚠️ Stanowisko już istnieje",
+      text: "Wprowadzona nazwa stanowiska jest już aktywna. Możesz wrócić do istniejącego stanowiska albo anulować i wpisać inną nazwę.",
+      details: `Nazwa stanowiska: <b>${escapeHtml(name)}</b>`,
+      buttons: [
+        { label: "Anuluj i zmień nazwę", value: "cancel", className: "btnCancel" },
+        { label: "Wróć do istniejącego stanowiska", value: "use_existing", className: "btnAnother" }
+      ]
+    });
+
+    if (choice !== "use_existing") {
       setStatus("leaderSetupStatus", "⚠️ Zmień nazwę stanowiska i spróbuj ponownie.", "warn");
       sound("warn");
       return;
@@ -1234,7 +1244,14 @@ async function openBagDetails(bagId) {
   const { data, error } = await supabaseClient.rpc("get_station_bag_details", { target_bag_id: bagId });
 
   if (error) {
-    alert("Błąd pobierania szczegółów torby: " + error.message);
+    await showChoiceModal({
+      title: "❌ Błąd pobierania szczegółów",
+      text: "Nie udało się pobrać aktualnej zawartości torby.",
+      details: `Komunikat błędu:<br><b>${escapeHtml(error.message)}</b>`,
+      buttons: [
+        { label: "Zamknij", value: "close", className: "btnCancel" }
+      ]
+    });
     return;
   }
 
