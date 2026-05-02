@@ -1151,7 +1151,9 @@ async function addLeaderBag(allowDuplicate = false) {
     await loadQueue();
     sound("ok");
   } else if (data === "BAG_ALREADY_ACTIVE") {
-    await handleDuplicateBag(bag);
+    await handleDuplicateBag(bag, "active");
+  } else if (data === "BAG_ALREADY_PACKED") {
+    await handleDuplicateBag(bag, "packed");
   } else if (data === "BAG_NOT_FOUND") {
     setStatus("leaderStatus", "❌ Brak torby w planie: " + bag, "bad");
     sound("bad");
@@ -1166,16 +1168,20 @@ async function addLeaderBag(allowDuplicate = false) {
   el("leaderBagInput").focus();
 }
 
-async function handleDuplicateBag(bag) {
+async function handleDuplicateBag(bag, duplicateType = "active") {
   sound("warn");
 
+  const isPacked = duplicateType === "packed";
+
   const choice = await showChoiceModal({
-    title: "⚠️ Torba jest już w kolejce",
-    text: "Lider zeskanował torbę, która jest już aktywna na tym stanowisku.",
+    title: isPacked ? "⚠️ Torba była już zapakowana" : "⚠️ Torba jest już w kolejce",
+    text: isPacked
+      ? "Lider zeskanował torbę, która ma już zakończony zapis. To może oznaczać poprawkę albo ponowne pakowanie tej samej torby."
+      : "Lider zeskanował torbę, która jest już aktywna na tym stanowisku.",
     details: `Kod torby: <b>${escapeHtml(bag)}</b><br><br>Wybierz, co chcesz zrobić z tym skanem.`,
     buttons: [
       { label: "Anuluj i wróć do skanowania", value: "cancel", className: "btnCancel" },
-      { label: "Usuń poprzedni zapis i zastąp nowym", value: "replace", className: "btnReplace" },
+      { label: isPacked ? "Popraw torbę i zastąp stary zapis" : "Usuń poprzedni zapis i zastąp nowym", value: "replace", className: "btnReplace" },
       { label: "Dodaj kolejną torbę z tym samym kodem", value: "duplicate", className: "btnAnother" }
     ]
   });
@@ -1203,7 +1209,7 @@ async function handleDuplicateBag(bag) {
     return;
   }
 
-  setStatus("leaderStatus", "✅ Zastąpiono poprzedni zapis torby: " + bag, "ok");
+  setStatus("leaderStatus", "✅ Torba została dodana do poprawy: " + bag, "ok");
   el("leaderBagInput").value = "";
   await loadQueue();
   sound("ok");
