@@ -420,6 +420,70 @@
       box-shadow:0 25px 80px rgba(0,0,0,.25);
     }
 
+    .confirmModal {
+      max-width:650px;
+      text-align:left;
+    }
+
+    .confirmModal h2 {
+      font-size:30px;
+      margin:0 0 12px;
+    }
+
+    .confirmText {
+      font-size:20px;
+      color:#374151;
+      line-height:1.45;
+      margin-bottom:18px;
+    }
+
+    .confirmDetails {
+      background:#f9fafb;
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px 16px;
+      margin-bottom:18px;
+      font-size:18px;
+      line-height:1.45;
+    }
+
+    .modalBtn {
+      width:100%;
+      font-size:22px;
+      padding:15px;
+      margin:8px 0;
+      border-radius:10px;
+    }
+
+    .btnCancel {
+      background:#e5e7eb;
+      color:#111827;
+    }
+
+    .btnCancel:hover {
+      background:#d1d5db;
+    }
+
+    .btnReplace {
+      background:#f97316;
+      color:white;
+      border:none;
+    }
+
+    .btnReplace:hover {
+      background:#ea580c;
+    }
+
+    .btnAnother {
+      background:#2563eb;
+      color:white;
+      border:none;
+    }
+
+    .btnAnother:hover {
+      background:#1d4ed8;
+    }
+
     .modalHeader {
       display:flex;
       justify-content:space-between;
@@ -657,6 +721,15 @@
   </div>
 </div>
 
+<div id="confirmModal" class="modalBg hidden">
+  <div class="modal confirmModal">
+    <h2 id="confirmTitle">Potwierdź akcję</h2>
+    <p id="confirmText" class="confirmText"></p>
+    <div id="confirmDetails" class="confirmDetails hidden"></div>
+    <div id="confirmButtons"></div>
+  </div>
+</div>
+
 <script>
 const PROJECT_URL = "https://lanmmbpqxmenyjwvwpkt.supabase.co";
 const PUBLISHABLE_KEY = "sb_publishable_sYrinkI1u2zr9uXZwsERNg_HE0wQKsC";
@@ -713,6 +786,38 @@ function setStatus(id, text, type = "muted") {
   if (!box) return;
   box.innerText = text;
   box.className = "statusBox " + type;
+}
+
+function showChoiceModal({ title, text, details = "", buttons = [] }) {
+  return new Promise(resolve => {
+    el("confirmTitle").innerText = title || "Potwierdź akcję";
+    el("confirmText").innerText = text || "";
+
+    if (details) {
+      el("confirmDetails").innerHTML = details;
+      el("confirmDetails").classList.remove("hidden");
+    } else {
+      el("confirmDetails").innerHTML = "";
+      el("confirmDetails").classList.add("hidden");
+    }
+
+    el("confirmButtons").innerHTML = buttons.map((btn, index) => `
+      <button class="modalBtn ${btn.className || "btnAnother"}" data-index="${index}">
+        ${btn.label}
+      </button>
+    `).join("");
+
+    [...el("confirmButtons").querySelectorAll("button")].forEach(button => {
+      button.onclick = () => {
+        const index = Number(button.dataset.index);
+        const value = buttons[index]?.value;
+        el("confirmModal").classList.add("hidden");
+        resolve(value);
+      };
+    });
+
+    el("confirmModal").classList.remove("hidden");
+  });
 }
 
 function sound(type) {
@@ -1054,14 +1159,23 @@ async function addLeaderBag(allowDuplicate = false) {
 async function handleDuplicateBag(bag) {
   sound("warn");
 
-  const duplicate = confirm("Ta torba jest już aktywna w kolejce: " + bag + "\n\nOK = dodaj drugą taką samą torbę\nAnuluj = pokaż kolejną opcję");
-  if (duplicate) {
+  const choice = await showChoiceModal({
+    title: "⚠️ Torba jest już w kolejce",
+    text: "Lider zeskanował torbę, która jest już aktywna na tym stanowisku.",
+    details: `Kod torby: <b>${escapeHtml(bag)}</b><br><br>Wybierz, co chcesz zrobić z tym skanem.`,
+    buttons: [
+      { label: "Anuluj i wróć do skanowania", value: "cancel", className: "btnCancel" },
+      { label: "Usuń poprzedni zapis i zastąp nowym", value: "replace", className: "btnReplace" },
+      { label: "Dodaj kolejną torbę z tym samym kodem", value: "duplicate", className: "btnAnother" }
+    ]
+  });
+
+  if (choice === "duplicate") {
     await addLeaderBag(true);
     return;
   }
 
-  const replace = confirm("Czy chcesz usunąć poprzedni aktywny zapis tej torby i zastąpić go nowym?\n\nOK = usuń i zastąp\nAnuluj = nic nie rób");
-  if (!replace) {
+  if (choice !== "replace") {
     setStatus("leaderStatus", "⚠️ Nie dodano torby.", "warn");
     return;
   }
@@ -1283,8 +1397,17 @@ async function clearSelectedMemberMeals() {
 async function removeMemberMeals(email) {
   if (!currentLineId || !email) return;
 
-  const ok = confirm("Usunąć przydział posiłków dla: " + displayLogin(email) + "?");
-  if (!ok) return;
+  const choice = await showChoiceModal({
+    title: "🗑️ Usunąć przydział posiłków?",
+    text: "Pracownik zostanie na stanowisku, ale nie będzie miał żadnych aktywnych posiłków do pakowania.",
+    details: `Pracownik: <b>${escapeHtml(displayLogin(email))}</b>`,
+    buttons: [
+      { label: "Anuluj", value: "cancel", className: "btnCancel" },
+      { label: "Usuń przydział posiłków", value: "remove", className: "btnReplace" }
+    ]
+  });
+
+  if (choice !== "remove") return;
 
   const { data, error } = await supabaseClient.rpc("remove_station_worker_assignment", {
     target_line_id: currentLineId,
@@ -1312,8 +1435,18 @@ async function removeMemberMeals(email) {
 
 async function closeCurrentLine() {
   if (!currentLineId) return;
-  const ok = confirm("Zamknąć stanowisko: " + currentLineName + "?");
-  if (!ok) return;
+
+  const choice = await showChoiceModal({
+    title: "🔒 Zamknąć stanowisko?",
+    text: "Po zamknięciu stanowisko nie będzie już aktywne dla pracowników.",
+    details: `Stanowisko: <b>${escapeHtml(currentLineName)}</b>`,
+    buttons: [
+      { label: "Anuluj", value: "cancel", className: "btnCancel" },
+      { label: "Zamknij stanowisko", value: "close", className: "btnReplace" }
+    ]
+  });
+
+  if (choice !== "close") return;
 
   const { error } = await supabaseClient.rpc("close_station_line", { target_line_id: currentLineId });
   if (error) {
@@ -1566,8 +1699,17 @@ async function removeBadScanAndRetry() {
 async function forceBadCurrentTask() {
   if (!currentTask || isBusy) return;
 
-  const ok = confirm("Oznaczyć tę tackę jako niepoprawną i puścić torbę dalej?");
-  if (!ok) return;
+  const choice = await showChoiceModal({
+    title: "❌ Zapakować jako niepoprawną?",
+    text: "Ta tacka zostanie oznaczona jako niepoprawna, a torba pójdzie dalej do kolejnych pracowników.",
+    details: `Torba: <b>${escapeHtml(currentTask.bag_qr)}</b><br>Posiłek: <b>${escapeHtml(currentTask.meal)}</b><br>Oczekiwana tacka: <b>${escapeHtml(currentTask.tray_qr || "-")}</b>${currentBadScan ? `<br>Zeskanowana błędna tacka: <b>${escapeHtml(currentBadScan.scannedValue)}</b>` : ""}`,
+    buttons: [
+      { label: "Anuluj i wróć do skanowania", value: "cancel", className: "btnCancel" },
+      { label: "Zostaw i zapakuj jako niepoprawną", value: "force", className: "btnReplace" }
+    ]
+  });
+
+  if (choice !== "force") return;
 
   isBusy = true;
 
