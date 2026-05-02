@@ -1129,6 +1129,33 @@ async function addLeaderBag(allowDuplicate = false) {
   if (!bag || !currentLineId || isBusy) return;
 
   isBusy = true;
+  setStatus("leaderStatus", "⏳ Sprawdzam torbę...", "muted");
+
+  if (!allowDuplicate) {
+    const { data: duplicateCheck, error: duplicateError } = await supabaseClient.rpc("prevent_duplicate_bag_global", {
+      p_bag: bag
+    });
+
+    if (duplicateError) {
+      isBusy = false;
+      setStatus("leaderStatus", "❌ Błąd sprawdzania torby: " + duplicateError.message, "bad");
+      sound("bad");
+      return;
+    }
+
+    if (duplicateCheck === "IN_QUEUE") {
+      isBusy = false;
+      await handleDuplicateBag(bag, "active");
+      return;
+    }
+
+    if (duplicateCheck === "IN_HISTORY") {
+      isBusy = false;
+      await handleDuplicateBag(bag, "packed");
+      return;
+    }
+  }
+
   setStatus("leaderStatus", "⏳ Dodaję torbę do kolejki...", "muted");
 
   const { data, error } = await supabaseClient.rpc("add_bag_to_station_line", {
