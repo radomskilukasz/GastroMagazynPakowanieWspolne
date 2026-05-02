@@ -517,7 +517,77 @@
 
     tr.doneRow { background:#f0fdf4; }
     tr.badRow { background:#fff1f2; }
+    
+    .leaderControlGrid {
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:14px;
+  margin-bottom:18px;
+}
 
+.leaderControlCard {
+  background:white;
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+
+.controlLabel {
+  color:var(--muted);
+  font-size:14px;
+  font-weight:bold;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:8px;
+}
+
+.controlValue {
+  font-size:30px;
+  font-weight:bold;
+}
+
+.liveDot {
+  display:inline-block;
+  width:12px;
+  height:12px;
+  border-radius:999px;
+  background:#22c55e;
+  margin-right:8px;
+}
+
+.memberItem.selectedMember {
+  border-color:var(--blue);
+  box-shadow:0 0 0 4px rgba(37,99,235,.12);
+  background:#eff6ff;
+}
+
+.queueActions {
+  display:flex;
+  gap:8px;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+}
+
+.queueActions button {
+  width:auto;
+  font-size:15px;
+  padding:10px 12px;
+  border-radius:10px;
+}
+
+@media(max-width:900px){
+  .leaderControlGrid {
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+@media(max-width:600px){
+  .leaderControlGrid {
+    grid-template-columns:1fr;
+  }
+}
+    
     @media(max-width:1300px){
       .leaderScanLayout, .leaderMembersLayout { grid-template-columns:1fr; }
     }
@@ -639,6 +709,27 @@
   </div>
 
   <div id="leaderScreen" class="hidden">
+    <div class="leaderControlGrid">
+  <div class="leaderControlCard">
+    <div class="controlLabel">Status live</div>
+    <div class="controlValue"><span class="liveDot"></span>Online</div>
+  </div>
+
+  <div class="leaderControlCard">
+    <div class="controlLabel">Torby w kolejce</div>
+    <div class="controlValue" id="leaderActiveBagsCount">0</div>
+  </div>
+
+  <div class="leaderControlCard">
+    <div class="controlLabel">Pracownicy</div>
+    <div class="controlValue" id="leaderMembersCount">0</div>
+  </div>
+
+  <div class="leaderControlCard">
+    <div class="controlLabel">Błędne torby</div>
+    <div class="controlValue bad" id="leaderBadBagsCount">0</div>
+  </div>
+</div>
     <div class="leaderTabs">
       <button id="leaderScanTabBtn" class="active" onclick="showLeaderTab('scan')">📦 Skanowanie toreb</button>
       <button id="leaderMembersTabBtn" onclick="showLeaderTab('members')">👥 Pracownicy i posiłki</button>
@@ -1246,12 +1337,20 @@ async function loadQueue() {
   if (!currentLineId) return;
 
   const { data, error } = await supabaseClient.rpc("get_station_queue", { target_line_id: currentLineId });
+
   if (error) {
     el("leaderQueue").innerHTML = `<div class="bad">Błąd kolejki: ${escapeHtml(error.message)}</div>`;
     return;
   }
 
   const rows = data || [];
+
+  const activeCount = rows.filter(x => ["queued", "in_progress"].includes(x.status)).length;
+  const badCount = rows.filter(x => x.has_error || x.status === "bad").length;
+
+  el("leaderActiveBagsCount").innerText = activeCount;
+  el("leaderBadBagsCount").innerText = badCount;
+
   if (!rows.length) {
     el("leaderQueue").innerHTML = `<div class="emptyState">Brak toreb w kolejce.</div>`;
     return;
@@ -1259,20 +1358,33 @@ async function loadQueue() {
 
   el("leaderQueue").innerHTML = rows.map(row => {
     const cls = row.status === "done" ? "doneBag" : row.has_error || row.status === "bad" ? "badBag" : "";
-    const statusText = row.status === "queued" ? "w kolejce" : row.status === "in_progress" ? "w trakcie" : row.status === "done" ? "gotowa" : "niepoprawna";
+    const statusText =
+      row.status === "queued" ? "w kolejce" :
+      row.status === "in_progress" ? "w trakcie" :
+      row.status === "done" ? "gotowa" :
+      row.status === "bad" ? "niepoprawna" :
+      row.status || "-";
 
     return `
-      <div class="queueItem ${cls}" onclick="openBagDetails('${row.bag_id}')">
-        <div>
+      <div class="queueItem ${cls}">
+        <div onclick="openBagDetails('${row.bag_id}')">
           <div class="bagCode">${escapeHtml(row.bag_qr)}</div>
-          <div class="muted">Status: <b>${statusText}</b> | Pozycja: ${row.queue_position}</div>
+          <div class="muted">
+            Status: <b>${escapeHtml(statusText)}</b> |
+            Pozycja: ${row.queue_position}
+          </div>
         </div>
-        <div class="progressPill">${row.finished_count || 0}/${row.expected_count || 0}</div>
+
+        <div>
+          <div class="progressPill">${row.finished_count || 0}/${row.expected_count || 0}</div>
+          <div class="queueActions" style="margin-top:10px;">
+            <button class="lightBtn" onclick="openBagDetails('${row.bag_id}')">Podgląd</button>
+          </div>
+        </div>
       </div>
     `;
   }).join("");
 }
-
 async function openBagDetails(bagId) {
   const { data, error } = await supabaseClient.rpc("get_station_bag_details", { target_bag_id: bagId });
 
@@ -1348,31 +1460,34 @@ async function loadMembers() {
   }
 
   const rows = data || [];
+  el("leaderMembersCount").innerText = rows.length;
 
   if (!rows.length) {
     el("membersList").innerHTML = `<div class="emptyState">Nikt jeszcze nie dołączył do stanowiska.</div>`;
     return;
   }
 
+  window.stationMembersCache = rows;
+
   el("membersList").innerHTML = rows.map((row, index) => {
     const meals = row.meals || [];
     const mealsText = meals.length ? meals.join(", ") : "brak przydziału";
+    const selectedClass = selectedMemberEmail === row.user_email ? "selectedMember" : "";
 
     return `
-      <div class="memberItem" onclick="selectMemberForEditByIndex(${index})" style="cursor:pointer;">
+      <div class="memberItem ${selectedClass}" onclick="selectMemberForEditByIndex(${index})" style="cursor:pointer;">
         <div>
           <div class="bagCode">${escapeHtml(displayLogin(row.user_email))}</div>
           <div class="muted">Posiłki: <b>${escapeHtml(mealsText)}</b></div>
         </div>
+
         <div class="memberActions" onclick="event.stopPropagation()">
-          <button class="successBtn" onclick="selectMemberForEditByIndex(${index})">✅ Wybierz / edytuj posiłki</button>
+          <button class="successBtn" onclick="selectMemberForEditByIndex(${index})">Wybierz / edytuj</button>
           <button class="danger" onclick="removeMemberMeals('${escapeHtml(row.user_email)}')">Usuń posiłki</button>
         </div>
       </div>
     `;
   }).join("");
-
-  window.stationMembersCache = rows;
 }
 
 function selectMemberForEditByIndex(index) {
@@ -1799,8 +1914,8 @@ async function tryCloseCurrentBag() {
 function startLeaderRefresh() {
   stopRefresh();
   refreshTimer = setInterval(async () => {
-    if (leaderActiveTab === "scan") await loadQueue();
-    if (leaderActiveTab === "members") await loadMembers();
+    await loadQueue();
+    await loadMembers();
   }, 3000);
 }
 
