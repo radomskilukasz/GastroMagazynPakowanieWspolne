@@ -911,6 +911,7 @@ const LOGIN_DOMAIN = "@pakowanie.local";
 const supabaseClient = window.supabase.createClient(PROJECT_URL, PUBLISHABLE_KEY);
 
 let currentUser = null;
+let currentAccessToken = "";
 let currentRole = null;
 let currentMode = null;
 let currentLineId = null;
@@ -1098,6 +1099,7 @@ async function login() {
   }
 
   currentUser = data.user;
+  currentAccessToken = data.session?.access_token || "";
   currentRole = await getUserRole(currentUser.id);
 
   if (!hasAccess(currentRole)) {
@@ -1106,22 +1108,75 @@ async function login() {
     return;
   }
 
+  /*
+    Po zalogowaniu zawsze sprzątamy ewentualne stare członkostwo tego użytkownika.
+    Dzięki temu po refreshu lub starym zamknięciu karty worker nie zostaje aktywny na stanowisku.
+  */
+  await leaveMyStationLine(null);
+
   el("currentUserLabel").innerText = displayLogin(currentUser.email);
   el("loginScreen").classList.add("hidden");
   el("appScreen").classList.remove("hidden");
 
   await loadLines();
   await loadMeals();
-  goToModeScreen();
+  await goToModeScreen();
   sound("ok");
 }
 
 async function logout() {
   stopRefresh();
+
+  await leaveCurrentWorkerIfNeeded();
+
   try {
     await supabaseClient.auth.signOut();
   } catch(e) {}
+
   location.reload();
+}
+
+async function leaveMyStationLine(lineId = null) {
+  try {
+    const { data, error } = await supabaseClient.rpc("leave_my_station_line", {
+      target_line_id: lineId
+    });
+
+    if (error) {
+      console.warn("Nie udało się opuścić stanowiska:", error);
+      return false;
+    }
+
+    return data === "OK";
+  } catch (err) {
+    console.warn("Błąd opuszczania stanowiska:", err);
+    return false;
+  }
+}
+
+async function leaveCurrentWorkerIfNeeded() {
+  if (currentMode === "worker" && currentLineId) {
+    await leaveMyStationLine(currentLineId);
+  }
+}
+
+function leaveMyStationLineKeepAlive(lineId = null) {
+  try {
+    if (!currentAccessToken) return;
+
+    fetch(`${PROJECT_URL}/rest/v1/rpc/leave_my_station_line`, {
+      method: "POST",
+      keepalive: true,
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": PUBLISHABLE_KEY,
+        "Authorization": `Bearer ${currentAccessToken}`
+      },
+      body: JSON.stringify({
+        target_line_id: lineId
+      })
+    });
+  } catch (err) {}
 }
 
 function hideAllMainScreens() {
@@ -1129,7 +1184,9 @@ function hideAllMainScreens() {
     .forEach(id => el(id).classList.add("hidden"));
 }
 
-function goToModeScreen() {
+async function goToModeScreen() {
+  await leaveCurrentWorkerIfNeeded();
+
   stopRefresh();
 
   currentMode = null;
@@ -1364,7 +1421,6 @@ async function handleDuplicateBag(bag, duplicateType = "active") {
   sound("warn");
 
   const isPacked = duplicateType === "packed";
-  const isActive = duplicateType === "active";
 
   const buttons = [
     { label: "Anuluj i wróć do skanowania", value: "cancel", className: "btnCancel" }
@@ -1809,6 +1865,11 @@ async function joinAsWorker() {
     return;
   }
 
+  /*
+    Przed wejściem jako worker sprzątamy poprzednie stare obecności tego użytkownika.
+  */
+  await leaveMyStationLine(null);
+
   const { data: joinResult, error: joinError } = await supabaseClient.rpc("join_station_line", {
     target_line_id: lineId
   });
@@ -2127,6 +2188,7 @@ async function restoreExistingSession() {
   if (!data || !data.session || !data.session.user) return;
 
   currentUser = data.session.user;
+  currentAccessToken = data.session.access_token || "";
   currentRole = await getUserRole(currentUser.id);
 
   if (!hasAccess(currentRole)) {
@@ -2134,13 +2196,19 @@ async function restoreExistingSession() {
     return;
   }
 
+  /*
+    Jeżeli ktoś odświeżył stronę jako worker albo zamknął kartę,
+    po ponownym wejściu usuwamy jego starą obecność ze stanowiska.
+  */
+  await leaveMyStationLine(null);
+
   el("currentUserLabel").innerText = displayLogin(currentUser.email);
   el("loginScreen").classList.add("hidden");
   el("appScreen").classList.remove("hidden");
 
   await loadLines();
   await loadMeals();
-  goToModeScreen();
+  await goToModeScreen();
 }
 
 restoreExistingSession();
@@ -2152,6 +2220,18 @@ window.addEventListener("click", () => {
 
   if (currentMode === "worker" && !el("workerScreen").classList.contains("hidden") && !currentBadScan) {
     setTimeout(() => el("trayScanInput")?.focus(), 50);
+  }
+});
+
+window.addEventListener("pagehide", () => {
+  if (currentMode === "worker" && currentLineId) {
+    leaveMyStationLineKeepAlive(currentLineId);
+  }
+});
+
+window.addEventListener("beforeunload", () => {
+  if (currentMode === "worker" && currentLineId) {
+    leaveMyStationLineKeepAlive(currentLineId);
   }
 });
 </script>
