@@ -177,7 +177,6 @@
     .modeCard h2 { font-size:30px; margin-bottom:8px; }
 
     .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-    .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
 
     .leaderTabs {
       display:grid;
@@ -226,7 +225,7 @@
       border:3px solid var(--blue);
     }
 
-    .queueList, .memberList, .assignmentsList, .historyList {
+    .queueList, .memberList, .historyList {
       display:flex;
       flex-direction:column;
       gap:12px;
@@ -293,13 +292,6 @@
       font-size:15px;
       padding:10px 12px;
       border-radius:10px;
-    }
-
-    .assignmentItem {
-      border:1px solid var(--border);
-      background:#f9fafb;
-      border-radius:18px;
-      padding:14px;
     }
 
     .bagCode {
@@ -660,7 +652,7 @@
     }
 
     @media(max-width:1100px){
-      .workerLayout, .grid2, .grid3, .modeGrid { grid-template-columns:1fr; }
+      .workerLayout, .grid2, .modeGrid { grid-template-columns:1fr; }
       .workerLayout { display:flex; flex-direction:column; }
       .mealGrid { grid-template-columns:1fr 1fr; }
     }
@@ -926,7 +918,47 @@ let refreshTimer = null;
 let audioCtx = null;
 let isBusy = false;
 
+const SESSION_MODE_KEY = "pakowanie_station_mode";
+const SESSION_LINE_KEY = "pakowanie_station_line_id";
+
 function el(id) { return document.getElementById(id); }
+
+function setStationSession(mode, lineId = "") {
+  try {
+    if (mode) sessionStorage.setItem(SESSION_MODE_KEY, mode);
+    else sessionStorage.removeItem(SESSION_MODE_KEY);
+
+    if (lineId) sessionStorage.setItem(SESSION_LINE_KEY, lineId);
+    else sessionStorage.removeItem(SESSION_LINE_KEY);
+  } catch(e) {}
+}
+
+function getStationSessionMode() {
+  try { return sessionStorage.getItem(SESSION_MODE_KEY) || ""; }
+  catch(e) { return ""; }
+}
+
+function getStationSessionLineId() {
+  try { return sessionStorage.getItem(SESSION_LINE_KEY) || ""; }
+  catch(e) { return ""; }
+}
+
+function clearStationSession() {
+  setStationSession("", "");
+}
+
+async function cleanupPreviousWorkerSessionIfNeeded() {
+  const previousMode = getStationSessionMode();
+  const previousLineId = getStationSessionLineId();
+
+  if (previousMode === "worker" && previousLineId) {
+    await leaveMyStationLine(previousLineId);
+  }
+
+  if (previousMode === "worker") {
+    clearStationSession();
+  }
+}
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, m => ({
@@ -1023,22 +1055,6 @@ function playTone(freq, volume, duration) {
   osc.stop(audioCtx.currentTime + duration);
 }
 
-function normalizeCode(value) {
-  return String(value || "")
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, "")
-    .replaceAll("Ś","S")
-    .replaceAll("Ą","A")
-    .replaceAll("Ć","C")
-    .replaceAll("Ę","E")
-    .replaceAll("Ł","L")
-    .replaceAll("Ń","N")
-    .replaceAll("Ó","O")
-    .replaceAll("Ź","Z")
-    .replaceAll("Ż","Z");
-}
-
 async function getUserRole(userId) {
   const { data, error } = await supabaseClient
     .from("user_roles")
@@ -1064,76 +1080,6 @@ function translateLoginError(errorMessage) {
   if (msg.includes("network") || msg.includes("failed to fetch")) return "Brak połączenia z internetem lub Supabase.";
 
   return "Nie udało się zalogować. Sprawdź login i hasło.";
-}
-
-el("loginInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") el("passwordInput").focus();
-});
-
-el("passwordInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") login();
-});
-
-async function login() {
-  setStatus("loginStatus", "⏳ Loguję...", "muted");
-
-  const email = getEmail(el("loginInput").value);
-  const password = el("passwordInput").value;
-
-  if (!email || !password) {
-    setStatus("loginStatus", "❌ Wpisz login i hasło.", "bad");
-    sound("bad");
-    return;
-  }
-
-  el("loginButton").disabled = true;
-
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
-  el("loginButton").disabled = false;
-
-  if (error) {
-    setStatus("loginStatus", "❌ " + translateLoginError(error.message), "bad");
-    sound("bad");
-    return;
-  }
-
-  currentUser = data.user;
-  currentAccessToken = data.session?.access_token || "";
-  currentRole = await getUserRole(currentUser.id);
-
-  if (!hasAccess(currentRole)) {
-    setStatus("loginStatus", "❌ Brak dostępu do pakowania stanowiskowego.", "bad");
-    sound("bad");
-    return;
-  }
-
-  /*
-    Po zalogowaniu zawsze sprzątamy ewentualne stare członkostwo tego użytkownika.
-    Dzięki temu po refreshu lub starym zamknięciu karty worker nie zostaje aktywny na stanowisku.
-  */
-  await leaveMyStationLine(null);
-
-  el("currentUserLabel").innerText = displayLogin(currentUser.email);
-  el("loginScreen").classList.add("hidden");
-  el("appScreen").classList.remove("hidden");
-
-  await loadLines();
-  await loadMeals();
-  await goToModeScreen();
-  sound("ok");
-}
-
-async function logout() {
-  stopRefresh();
-
-  await leaveCurrentWorkerIfNeeded();
-
-  try {
-    await supabaseClient.auth.signOut();
-  } catch(e) {}
-
-  location.reload();
 }
 
 async function leaveMyStationLine(lineId = null) {
@@ -1179,6 +1125,74 @@ function leaveMyStationLineKeepAlive(lineId = null) {
   } catch (err) {}
 }
 
+el("loginInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") el("passwordInput").focus();
+});
+
+el("passwordInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") login();
+});
+
+async function login() {
+  setStatus("loginStatus", "⏳ Loguję...", "muted");
+
+  const email = getEmail(el("loginInput").value);
+  const password = el("passwordInput").value;
+
+  if (!email || !password) {
+    setStatus("loginStatus", "❌ Wpisz login i hasło.", "bad");
+    sound("bad");
+    return;
+  }
+
+  el("loginButton").disabled = true;
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  el("loginButton").disabled = false;
+
+  if (error) {
+    setStatus("loginStatus", "❌ " + translateLoginError(error.message), "bad");
+    sound("bad");
+    return;
+  }
+
+  currentUser = data.user;
+  currentAccessToken = data.session?.access_token || "";
+  currentRole = await getUserRole(currentUser.id);
+
+  if (!hasAccess(currentRole)) {
+    setStatus("loginStatus", "❌ Brak dostępu do pakowania stanowiskowego.", "bad");
+    sound("bad");
+    return;
+  }
+
+  await cleanupPreviousWorkerSessionIfNeeded();
+
+  el("currentUserLabel").innerText = displayLogin(currentUser.email);
+  el("loginScreen").classList.add("hidden");
+  el("appScreen").classList.remove("hidden");
+
+  await loadLines();
+  await loadMeals();
+  await goToModeScreen();
+  sound("ok");
+}
+
+async function logout() {
+  stopRefresh();
+
+  await leaveCurrentWorkerIfNeeded();
+
+  clearStationSession();
+
+  try {
+    await supabaseClient.auth.signOut();
+  } catch(e) {}
+
+  location.reload();
+}
+
 function hideAllMainScreens() {
   ["modeScreen", "leaderSetupScreen", "workerSetupScreen", "leaderScreen", "workerScreen"]
     .forEach(id => el(id).classList.add("hidden"));
@@ -1198,6 +1212,8 @@ async function goToModeScreen() {
   taskList = [];
   currentTask = null;
   currentBadScan = null;
+
+  clearStationSession();
 
   el("currentLineLabel").innerText = "brak";
   el("mainTitle").innerText = "Pakowanie stanowiskowe";
@@ -1309,6 +1325,8 @@ async function enterLeaderScreen(lineId, lineName) {
   currentLineId = lineId;
   currentLineName = lineName;
   currentMode = "leader";
+
+  setStationSession("leader", currentLineId);
 
   el("currentLineLabel").innerText = currentLineName;
   el("mainTitle").innerText = "Lider — " + currentLineName;
@@ -1865,10 +1883,7 @@ async function joinAsWorker() {
     return;
   }
 
-  /*
-    Przed wejściem jako worker sprzątamy poprzednie stare obecności tego użytkownika.
-  */
-  await leaveMyStationLine(null);
+  await cleanupPreviousWorkerSessionIfNeeded();
 
   const { data: joinResult, error: joinError } = await supabaseClient.rpc("join_station_line", {
     target_line_id: lineId
@@ -1883,6 +1898,8 @@ async function joinAsWorker() {
   currentLineId = lineId;
   currentLineName = lineName;
   currentMode = "worker";
+
+  setStationSession("worker", currentLineId);
 
   el("currentLineLabel").innerText = currentLineName;
   el("mainTitle").innerText = "Pracownik — " + currentLineName;
@@ -2196,11 +2213,7 @@ async function restoreExistingSession() {
     return;
   }
 
-  /*
-    Jeżeli ktoś odświeżył stronę jako worker albo zamknął kartę,
-    po ponownym wejściu usuwamy jego starą obecność ze stanowiska.
-  */
-  await leaveMyStationLine(null);
+  await cleanupPreviousWorkerSessionIfNeeded();
 
   el("currentUserLabel").innerText = displayLogin(currentUser.email);
   el("loginScreen").classList.add("hidden");
