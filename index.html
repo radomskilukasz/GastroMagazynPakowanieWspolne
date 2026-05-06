@@ -263,6 +263,12 @@
       background:#f0fdf4;
     }
 
+    .queueItem.brakiBag,
+    .historyItem.brakiBag {
+      border-color:#fde68a;
+      background:#fffbeb;
+    }
+
     .historyItem.replacedBag,
     .historyItem.cancelledBag {
       border-color:#fed7aa;
@@ -309,6 +315,11 @@
       white-space:nowrap;
     }
 
+    .progressPill.warnPill {
+      background:#fef3c7;
+      color:#92400e;
+    }
+
     .mealGrid {
       display:grid;
       grid-template-columns:repeat(3, minmax(0, 1fr));
@@ -352,6 +363,18 @@
       background:#eff6ff;
       border:2px solid #bfdbfe;
       color:#1e3a8a;
+      border-radius:20px;
+      padding:16px;
+      margin-bottom:18px;
+      font-weight:bold;
+      font-size:20px;
+      line-height:1.45;
+    }
+
+    .brakiBanner {
+      background:#fffbeb;
+      border:2px solid #fde68a;
+      color:#92400e;
       border-radius:20px;
       padding:16px;
       margin-bottom:18px;
@@ -432,6 +455,10 @@
       grid-template-columns:1fr 1fr;
       gap:12px;
       margin-top:12px;
+    }
+
+    .taskActions.threeActions {
+      grid-template-columns:1fr 1fr 1fr;
     }
 
     .nextList { display:flex; flex-direction:column; gap:10px; }
@@ -564,6 +591,7 @@
 
     tr.doneRow { background:#f0fdf4; }
     tr.badRow { background:#fff1f2; }
+    tr.brakiRow { background:#fffbeb; }
 
     .leaderControlGrid {
       display:grid;
@@ -655,6 +683,7 @@
       .workerLayout, .grid2, .modeGrid { grid-template-columns:1fr; }
       .workerLayout { display:flex; flex-direction:column; }
       .mealGrid { grid-template-columns:1fr 1fr; }
+      .taskActions.threeActions { grid-template-columns:1fr; }
     }
 
     @media(max-width:700px){
@@ -785,7 +814,7 @@
       </div>
 
       <div class="leaderControlCard">
-        <div class="controlLabel">Błędne torby</div>
+        <div class="controlLabel">Błędne / braki</div>
         <div class="controlValue bad" id="leaderBadBagsCount">0</div>
       </div>
     </div>
@@ -799,7 +828,7 @@
       <div class="leaderScanLayout">
         <div class="card">
           <h2>📦 Skanuj torby do kolejki</h2>
-          <p class="muted">Na stanowisku może być maksymalnie 10 aktywnych toreb. Zamknięte torby znikają z kolejki i trafiają do raportu oraz historii stanowiska.</p>
+          <p class="muted">Na stanowisku może być maksymalnie 10 aktywnych toreb. Torby ze statusem BRAKI otwierają się automatycznie do dopakowania.</p>
 
           <input id="leaderBagInput" class="scanInput" placeholder="Zeskanuj torbę">
           <p id="leaderStatus" class="statusBox muted"></p>
@@ -821,7 +850,7 @@
             <div class="historyHeaderRow">
               <div>
                 <h2>🕘 Historia stanowiska</h2>
-                <p class="muted" style="margin-bottom:0;">Ostatnie zakończone, zastąpione lub anulowane torby.</p>
+                <p class="muted" style="margin-bottom:0;">Ostatnie zakończone, zastąpione, anulowane torby oraz BRAKI.</p>
               </div>
               <button class="lightBtn" onclick="loadLineHistory()">Odśwież historię</button>
             </div>
@@ -869,7 +898,7 @@
 
       <div class="card">
         <h2>⏭️ Kolejne zadania</h2>
-        <p class="muted">Lista pokazuje kolejne torby z Twoich aktualnych posiłków.</p>
+        <p class="muted">Lista pokazuje kolejne torby z Twoich aktualnych posiłków. Po ponownym otwarciu torby BRAKI powinny zostać tylko brakujące pozycje.</p>
         <div id="nextTasks" class="nextList"></div>
       </div>
     </div>
@@ -971,7 +1000,11 @@ function escapeHtml(value) {
 }
 
 function escapeJs(value) {
-  return String(value ?? "").replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "");
+  return String(value ?? "")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "");
 }
 
 function getEmail(value) {
@@ -983,6 +1016,15 @@ function getEmail(value) {
 
 function displayLogin(value) {
   return String(value || "").toLowerCase().replace(LOGIN_DOMAIN, "");
+}
+
+function normalizeStatus(status) {
+  const value = String(status || "").toUpperCase().trim();
+
+  if (value === "NIEPRAWIDŁOWA") return "NIEPOPRAWNA";
+  if (value === "DO_DOPAKOWANIA" || value === "DO DOPAKOWANIA") return "BRAKI";
+
+  return value;
 }
 
 function formatDateTimePL(dateText) {
@@ -1034,9 +1076,11 @@ function showChoiceModal({ title, text, details = "", buttons = [] }) {
 function sound(type) {
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
     if (type === "ok") playTone(900, 0.08, 0.08);
     if (type === "bad") playTone(180, 0.18, 1.25);
     if (type === "warn") playTone(450, 0.12, 0.18);
+
     if (type === "done") {
       playTone(1000, 0.09, 0.10);
       setTimeout(() => playTone(1300, 0.09, 0.12), 120);
@@ -1176,6 +1220,7 @@ async function login() {
   await loadLines();
   await loadMeals();
   await goToModeScreen();
+
   sound("ok");
 }
 
@@ -1341,6 +1386,7 @@ async function enterLeaderScreen(lineId, lineName) {
   await refreshLeaderData();
   showLeaderTab("scan");
   startLeaderRefresh();
+
   sound("ok");
 }
 
@@ -1363,40 +1409,46 @@ el("leaderBagInput").addEventListener("keydown", e => {
   if (e.key === "Enter") addLeaderBag();
 });
 
-async function addLeaderBag(allowDuplicate = false) {
-  const bag = el("leaderBagInput").value.trim();
+async function getBrakiSessionForBag(bag) {
+  const { data, error } = await supabaseClient.rpc("get_bag_braki_session", {
+    target_bag: bag
+  });
 
-  if (!bag || !currentLineId || isBusy) return;
-
-  isBusy = true;
-  setStatus("leaderStatus", "⏳ Sprawdzam torbę...", "muted");
-
-  if (!allowDuplicate) {
-    const { data: duplicateCheck, error: duplicateError } = await supabaseClient.rpc("prevent_duplicate_bag_global", {
-      p_bag: bag
-    });
-
-    if (duplicateError) {
-      isBusy = false;
-      setStatus("leaderStatus", "❌ Błąd sprawdzania torby: " + duplicateError.message, "bad");
-      sound("bad");
-      return;
-    }
-
-    if (duplicateCheck === "IN_QUEUE") {
-      isBusy = false;
-      await handleDuplicateBag(bag, "active");
-      return;
-    }
-
-    if (duplicateCheck === "IN_HISTORY") {
-      isBusy = false;
-      await handleDuplicateBag(bag, "packed");
-      return;
-    }
+  if (error) {
+    console.warn("Nie udało się sprawdzić BRAKI:", error);
+    return null;
   }
 
-  setStatus("leaderStatus", "⏳ Dodaję torbę do kolejki...", "muted");
+  return data && data.length ? data[0] : null;
+}
+
+async function ensureLatestStationBagStates(bagQr) {
+  try {
+    const { data, error } = await supabaseClient.rpc("get_station_queue", {
+      target_line_id: currentLineId
+    });
+
+    if (error || !data) return;
+
+    const rows = data
+      .filter(x => String(x.bag_qr || "") === String(bagQr || ""))
+      .filter(x => ["queued", "in_progress"].includes(String(x.status || "")))
+      .sort((a, b) => Number(b.queue_position || 0) - Number(a.queue_position || 0));
+
+    const latest = rows[0];
+
+    if (!latest?.bag_id) return;
+
+    await supabaseClient.rpc("ensure_station_bag_item_states", {
+      target_bag_id: latest.bag_id
+    });
+  } catch(e) {
+    console.warn("ensureLatestStationBagStates error:", e);
+  }
+}
+
+async function addBagToLineInternal(bag, allowDuplicate = false, options = {}) {
+  setStatus("leaderStatus", options.brakiMode ? "⏳ Otwieram torbę BRAKI do dopakowania..." : "⏳ Dodaję torbę do kolejki...", "muted");
 
   const { data, error } = await supabaseClient.rpc("add_bag_to_station_line", {
     target_line_id: currentLineId,
@@ -1404,35 +1456,98 @@ async function addLeaderBag(allowDuplicate = false) {
     allow_duplicate: allowDuplicate
   });
 
-  isBusy = false;
-
   if (error) {
     setStatus("leaderStatus", "❌ Błąd: " + error.message, "bad");
     sound("bad");
-    return;
+    return false;
   }
 
   if (data === "OK") {
-    setStatus("leaderStatus", "✅ Dodano torbę: " + bag, "ok");
+    await ensureLatestStationBagStates(bag);
+
+    setStatus(
+      "leaderStatus",
+      options.brakiMode
+        ? "🟡 Otworzono torbę BRAKI do dopakowania: " + bag
+        : "✅ Dodano torbę: " + bag,
+      options.brakiMode ? "warn" : "ok"
+    );
+
     el("leaderBagInput").value = "";
     await refreshLeaderData();
-    sound("ok");
-  } else if (data === "BAG_ALREADY_ACTIVE") {
-    await handleDuplicateBag(bag, "active");
-  } else if (data === "BAG_ALREADY_PACKED") {
-    await handleDuplicateBag(bag, "packed");
-  } else if (data === "BAG_NOT_FOUND") {
-    setStatus("leaderStatus", "❌ Brak torby w planie: " + bag, "bad");
-    sound("bad");
-  } else if (data === "QUEUE_FULL") {
-    setStatus("leaderStatus", "⚠️ Kolejka pełna. Maksymalnie 10 aktywnych toreb.", "warn");
-    sound("warn");
-  } else {
-    setStatus("leaderStatus", "❌ Nie udało się dodać torby: " + data, "bad");
-    sound("bad");
+    sound(options.brakiMode ? "warn" : "ok");
+    return true;
   }
 
-  el("leaderBagInput").focus();
+  if (data === "BAG_ALREADY_ACTIVE") {
+    await handleDuplicateBag(bag, "active");
+    return false;
+  }
+
+  if (data === "BAG_ALREADY_PACKED") {
+    await handleDuplicateBag(bag, "packed");
+    return false;
+  }
+
+  if (data === "BAG_NOT_FOUND") {
+    setStatus("leaderStatus", "❌ Brak torby w planie: " + bag, "bad");
+    sound("bad");
+    return false;
+  }
+
+  if (data === "QUEUE_FULL") {
+    setStatus("leaderStatus", "⚠️ Kolejka pełna. Maksymalnie 10 aktywnych toreb.", "warn");
+    sound("warn");
+    return false;
+  }
+
+  setStatus("leaderStatus", "❌ Nie udało się dodać torby: " + data, "bad");
+  sound("bad");
+  return false;
+}
+
+async function addLeaderBag() {
+  const bag = el("leaderBagInput").value.trim();
+
+  if (!bag || !currentLineId || isBusy) return;
+
+  isBusy = true;
+  setStatus("leaderStatus", "⏳ Sprawdzam torbę...", "muted");
+
+  try {
+    const { data: duplicateCheck, error: duplicateError } = await supabaseClient.rpc("prevent_duplicate_bag_global", {
+      p_bag: bag
+    });
+
+    if (duplicateError) {
+      setStatus("leaderStatus", "❌ Błąd sprawdzania torby: " + duplicateError.message, "bad");
+      sound("bad");
+      return;
+    }
+
+    if (duplicateCheck === "IN_QUEUE") {
+      await handleDuplicateBag(bag, "active");
+      return;
+    }
+
+    const brakiSession = await getBrakiSessionForBag(bag);
+
+    if (brakiSession) {
+      await addBagToLineInternal(bag, true, { brakiMode:true, brakiSession });
+      return;
+    }
+
+    if (duplicateCheck === "IN_HISTORY") {
+      await handleDuplicateBag(bag, "packed");
+      return;
+    }
+
+    await addBagToLineInternal(bag, false);
+
+  } finally {
+    isBusy = false;
+    setTimeout(() => el("leaderBagInput")?.focus(), 80);
+  }
 }
 
 async function handleDuplicateBag(bag, duplicateType = "active") {
@@ -1461,14 +1576,14 @@ async function handleDuplicateBag(bag, duplicateType = "active") {
   const choice = await showChoiceModal({
     title: isPacked ? "⚠️ Torba była już zapakowana" : "⚠️ Torba jest już w aktywnej kolejce",
     text: isPacked
-      ? "Lider zeskanował torbę, która ma już zakończony zapis. To może oznaczać poprawkę albo ponowne pakowanie tej samej torby."
+      ? "Lider zeskanował torbę, która ma już zakończony zapis. Jeżeli to torba BRAKI, zostanie otwarta automatycznie — tutaj chodzi o zwykły zakończony zapis."
       : "Lider zeskanował torbę, która jest już aktywna na stanowisku. Możesz anulować albo dodać kolejną fizyczną torbę z tym samym kodem.",
     details: `Kod torby: <b>${escapeHtml(bag)}</b><br><br>Wybierz, co chcesz zrobić z tym skanem.`,
     buttons
   });
 
   if (choice === "duplicate") {
-    await addLeaderBag(true);
+    await addBagToLineInternal(bag, true);
     return;
   }
 
@@ -1487,6 +1602,8 @@ async function handleDuplicateBag(bag, duplicateType = "active") {
       sound("bad");
       return;
     }
+
+    await ensureLatestStationBagStates(bag);
 
     setStatus("leaderStatus", "✅ Torba została dodana do poprawy: " + bag, "ok");
     el("leaderBagInput").value = "";
@@ -1521,22 +1638,29 @@ async function loadQueue() {
 
   const rows = data || [];
 
-  const activeCount = rows.filter(x => ["queued", "in_progress"].includes(x.status)).length;
-  const badCount = rows.filter(x => x.has_error).length;
+  const activeRows = rows.filter(x => ["queued", "in_progress"].includes(x.status));
+  const activeCount = activeRows.length;
+  const badCount = rows.filter(x => x.has_error || normalizeStatus(x.status) === "BRAKI").length;
 
   el("leaderActiveBagsCount").innerText = activeCount;
   el("leaderBadBagsCount").innerText = badCount;
 
-  if (!rows.length) {
+  if (!activeRows.length) {
     el("leaderQueue").innerHTML = `<div class="emptyState">Brak aktywnych toreb w kolejce.</div>`;
     return;
   }
 
-  el("leaderQueue").innerHTML = rows.map(row => {
-    const cls = row.has_error ? "badBag" : "";
+  el("leaderQueue").innerHTML = activeRows.map(row => {
+    const status = normalizeStatus(row.status);
+    const cls =
+      status === "BRAKI" ? "brakiBag" :
+      row.has_error ? "badBag" :
+      "";
+
     const statusText =
       row.status === "queued" ? "w kolejce" :
       row.status === "in_progress" ? "w trakcie" :
+      status === "BRAKI" ? "braki" :
       row.status || "-";
 
     return `
@@ -1550,7 +1674,7 @@ async function loadQueue() {
         </div>
 
         <div>
-          <div class="progressPill">${row.finished_count || 0}/${row.expected_count || 0}</div>
+          <div class="progressPill ${status === "BRAKI" ? "warnPill" : ""}">${row.finished_count || 0}/${row.expected_count || 0}</div>
           <div class="queueActions" style="margin-top:10px;">
             <button class="lightBtn" onclick="openBagDetails('${escapeJs(row.bag_id)}')">Podgląd</button>
           </div>
@@ -1581,9 +1705,12 @@ async function loadLineHistory() {
   }
 
   el("leaderHistory").innerHTML = rows.map(row => {
+    const status = normalizeStatus(row.status);
+
     const cls =
       row.status === "done" ? "doneBag" :
       row.status === "bad" ? "badBag" :
+      status === "BRAKI" || row.status === "braki" ? "brakiBag" :
       row.status === "replaced" ? "replacedBag" :
       row.status === "cancelled" ? "cancelledBag" :
       "";
@@ -1591,6 +1718,7 @@ async function loadLineHistory() {
     const statusText =
       row.status === "done" ? "poprawna" :
       row.status === "bad" ? "niepoprawna" :
+      status === "BRAKI" || row.status === "braki" ? "braki / do dopakowania" :
       row.status === "replaced" ? "zastąpiona" :
       row.status === "cancelled" ? "anulowana" :
       row.status || "-";
@@ -1605,7 +1733,7 @@ async function loadLineHistory() {
           </div>
         </div>
         <div>
-          <div class="progressPill">${row.correct_count || 0}/${row.expected_count || 0}</div>
+          <div class="progressPill ${status === "BRAKI" || row.status === "braki" ? "warnPill" : ""}">${row.correct_count || 0}/${row.expected_count || 0}</div>
         </div>
       </div>
     `;
@@ -1651,10 +1779,17 @@ async function openBagDetails(bagId) {
         </thead>
         <tbody>
           ${rows.map(r => {
-            const scanStatus = r.scan_status || "brak";
-            const cls = scanStatus === "ok" ? "doneRow" : ["wrong", "duplicate", "forced_bad"].includes(scanStatus) ? "badRow" : "";
+            const scanStatus = String(r.scan_status || "brak").toLowerCase();
+
+            const cls =
+              scanStatus === "ok" ? "doneRow" :
+              scanStatus === "brak" ? "brakiRow" :
+              ["wrong", "duplicate", "forced_bad"].includes(scanStatus) ? "badRow" :
+              "";
+
             const label =
               scanStatus === "ok" ? "OK" :
+              scanStatus === "brak" ? "BRAK" :
               scanStatus === "wrong" ? "BŁĘDNA" :
               scanStatus === "duplicate" ? "DUPLIKAT" :
               scanStatus === "forced_bad" ? "NIEPOPRAWNA" :
@@ -1666,7 +1801,7 @@ async function openBagDetails(bagId) {
                 <td>${escapeHtml(r.code || "-")}</td>
                 <td>${escapeHtml(r.size || "-")}</td>
                 <td>${escapeHtml(r.expected_tray_qr || "-")}</td>
-                <td>${escapeHtml(label)}</td>
+                <td class="${scanStatus === "ok" ? "ok" : scanStatus === "brak" ? "warn" : scanStatus === "not_scanned" ? "muted" : "bad"}">${escapeHtml(label)}</td>
                 <td>${escapeHtml(r.scanned_tray_qr || "-")}</td>
                 <td>${escapeHtml(displayLogin(r.scanned_by_email || "-"))}</td>
               </tr>
@@ -1910,6 +2045,7 @@ async function joinAsWorker() {
   await loadMyAssignment();
   await loadTasks();
   startWorkerRefresh();
+
   sound("ok");
 }
 
@@ -1931,6 +2067,7 @@ async function loadMyAssignment() {
   myAssignedMeals = row?.meals || [];
 
   if (!myAssignedMeals.length) {
+    el("workerAssignmentBox").className = "assignmentBanner";
     el("workerAssignmentBox").innerHTML = "Czekasz na przydział od lidera. Po przydzieleniu posiłków zadania pojawią się automatycznie.";
     taskList = [];
     currentTask = null;
@@ -1938,6 +2075,7 @@ async function loadMyAssignment() {
     return;
   }
 
+  el("workerAssignmentBox").className = "assignmentBanner";
   el("workerAssignmentBox").innerHTML = `Twoje aktualne posiłki: <b>${escapeHtml(myAssignedMeals.join(", "))}</b>`;
 }
 
@@ -2004,18 +2142,25 @@ function renderWorkerTask(errorMessage = "") {
       <div class="metaValue">${escapeHtml(currentTask.dish_name || "-")}</div>
     </div>
 
+    <div class="brakiBanner">
+      Jeżeli tej tacki fizycznie brakuje, kliknij <b>BRAKI / do dopakowania</b>.
+      Torba wróci później do dopakowania i nie trzeba będzie skanować wszystkiego od nowa.
+    </div>
+
     <input id="trayScanInput" class="scanInput" placeholder="Zeskanuj tackę" ${currentBadScan ? "disabled" : ""} autocomplete="off">
 
     ${errorMessage ? `<p class="statusBox bad">${escapeHtml(errorMessage)}</p>` : `<p class="statusBox muted">Zeskanuj tackę dla tej konkretnej pozycji planu.</p>`}
     ${badScanHtml}
 
-    <div class="taskActions">
-      <button class="danger" onclick="forceBadCurrentTask()">Zapakuj jako niepoprawną</button>
+    <div class="taskActions threeActions">
+      <button class="warning" onclick="markCurrentTaskBrak()" ${currentBadScan ? "disabled" : ""}>🟡 BRAKI / do dopakowania</button>
+      <button class="danger" onclick="forceBadCurrentTask()">❌ Zapakuj jako niepoprawną</button>
       <button class="lightBtn" onclick="loadTasks()">Odśwież</button>
     </div>
   `;
 
   const scanInput = el("trayScanInput");
+
   if (scanInput && !currentBadScan) {
     scanInput.focus();
     scanInput.addEventListener("keydown", e => {
@@ -2052,6 +2197,7 @@ async function scanCurrentTray() {
 
   const input = el("trayScanInput");
   const scannedValue = input.value.trim();
+
   if (!scannedValue) return;
 
   isBusy = true;
@@ -2122,6 +2268,48 @@ async function removeBadScanAndRetry() {
   sound("warn");
 }
 
+async function markCurrentTaskBrak() {
+  if (!currentTask || isBusy || currentBadScan) return;
+
+  const choice = await showChoiceModal({
+    title: "🟡 Oznaczyć jako BRAKI?",
+    text: "Ta pozycja zostanie oznaczona jako brakująca. Torba trafi do dopakowania i po ponownym zeskanowaniu będzie można dołożyć brakującą tackę bez skanowania całej torby od nowa.",
+    details: `
+      Torba: <b>${escapeHtml(currentTask.bag_qr)}</b><br>
+      Posiłek: <b>${escapeHtml(currentTask.meal)}</b><br>
+      Brakująca tacka: <b>${escapeHtml(currentTask.tray_qr || "-")}</b><br><br>
+      Używaj tego tylko wtedy, gdy towaru faktycznie nie ma fizycznie na stanowisku.
+    `,
+    buttons: [
+      { label: "Anuluj i wróć do skanowania", value: "cancel", className: "btnCancel" },
+      { label: "Oznacz BRAKI / do dopakowania", value: "braki", className: "btnReplace" }
+    ]
+  });
+
+  if (choice !== "braki") return;
+
+  isBusy = true;
+
+  const { data, error } = await supabaseClient.rpc("mark_station_task_brak", {
+    target_bag_id: currentTask.bag_id,
+    target_plan_item_id: currentTask.plan_item_id
+  });
+
+  isBusy = false;
+
+  if (error || data !== "OK") {
+    renderWorkerTask("❌ Nie udało się oznaczyć BRAKI: " + (error?.message || data));
+    sound("bad");
+    return;
+  }
+
+  currentBadScan = null;
+  sound("warn");
+
+  await tryCloseCurrentBag();
+  await loadTasks();
+}
+
 async function forceBadCurrentTask() {
   if (!currentTask || isBusy) return;
 
@@ -2159,6 +2347,7 @@ async function forceBadCurrentTask() {
 
   currentBadScan = null;
   sound("warn");
+
   await tryCloseCurrentBag();
   await loadTasks();
 }
@@ -2175,13 +2364,31 @@ async function tryCloseCurrentBag() {
     return;
   }
 
-  if (data === "POPRAWNA" || data === "NIEPOPRAWNA") {
+  const result = normalizeStatus(data);
+
+  if (result === "POPRAWNA") {
     sound("done");
+  }
+
+  if (result === "NIEPOPRAWNA") {
+    sound("done");
+  }
+
+  if (result === "BRAKI") {
+    sound("warn");
+  }
+
+  if (["POPRAWNA", "NIEPOPRAWNA", "BRAKI"].includes(result)) {
+    await Promise.allSettled([
+      loadQueue(),
+      loadLineHistory()
+    ]);
   }
 }
 
 function startLeaderRefresh() {
   stopRefresh();
+
   refreshTimer = setInterval(async () => {
     await refreshLeaderData();
   }, 3000);
@@ -2189,6 +2396,7 @@ function startLeaderRefresh() {
 
 function startWorkerRefresh() {
   stopRefresh();
+
   refreshTimer = setInterval(loadTasks, 3000);
 }
 
