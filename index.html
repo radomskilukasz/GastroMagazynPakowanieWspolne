@@ -108,20 +108,19 @@
       box-sizing:border-box;
     }
 
+    .logoBox,
     .loginLogo {
       text-align:center;
       margin-bottom:15px;
     }
 
+    .logoBox img,
     .loginLogo img {
       width:90px;
       height:auto;
       display:block;
       margin:0 auto;
     }
-
-    .logoBox { text-align:center; margin-bottom:15px; }
-    .logoBox img { width:90px; height:auto; display:block; margin:0 auto; }
 
     .loginCard h1 {
       text-align:center;
@@ -187,10 +186,6 @@
       background:var(--blue);
       color:white;
       font-weight:bold;
-    }
-
-    .qrLoginBtn:hover {
-      background:var(--blue-dark);
     }
 
     .togglePasswordBtn {
@@ -306,6 +301,28 @@
       min-height:48px;
       font-weight:bold;
       line-height:1.35;
+    }
+
+    .statusBox.ok {
+      background:#dcfce7;
+      border-color:#bbf7d0;
+      color:#166534;
+    }
+
+    .statusBox.bad {
+      background:#fee2e2;
+      border-color:#fecaca;
+      color:#991b1b;
+    }
+
+    .statusBox.warn {
+      background:#fffbeb;
+      border-color:#fde68a;
+      color:#92400e;
+    }
+
+    .statusBox.muted {
+      color:var(--muted);
     }
 
     .topbar {
@@ -901,13 +918,13 @@
   <div id="passwordLoginBox" class="passwordLoginBox hidden">
     <div class="loginDivider">awaryjnie</div>
 
-    <label>Login</label>
-    <input id="loginInput" class="loginInput" placeholder="np. JanKowalski" autocomplete="username">
+    <label>Login pracownika</label>
+    <input id="email" class="loginInput" placeholder="np. JanKowalski" autocomplete="username">
 
     <label>Hasło</label>
-    <input id="passwordInput" class="loginInput" type="password" placeholder="Wpisz hasło" autocomplete="current-password">
+    <input id="password" class="loginInput" type="password" placeholder="Wpisz hasło" autocomplete="current-password">
 
-    <button id="loginButton" type="button" class="loginBtn" onclick="login()">Zaloguj loginem i hasłem</button>
+    <button id="loginBtn" type="button" class="loginBtn" onclick="login()">Zaloguj loginem i hasłem</button>
   </div>
 
   <p id="loginStatus" class="loginStatus"></p>
@@ -1204,9 +1221,7 @@ function displayLogin(value) {
 }
 
 function normalizeQrToken(value) {
-  return String(value || "")
-    .trim()
-    .replace(/\s+/g, "");
+  return String(value || "").trim().replace(/\s+/g, "");
 }
 
 function normalizeStatus(status) {
@@ -1232,18 +1247,9 @@ function setStatus(id, text, type = "muted") {
   box.className = "statusBox " + type;
 }
 
-function setLoginStatus(text, type = "error") {
-  const box = el("loginStatus");
-  if (!box) return;
-
-  box.innerText = text || "";
-
-  if (!text) {
-    box.className = "loginStatus";
-    return;
-  }
-
-  box.className = "loginStatus " + type;
+function showLoginMessage(text, type = "error") {
+  el("loginStatus").innerText = text;
+  el("loginStatus").className = "loginStatus " + type;
 }
 
 function togglePasswordLogin() {
@@ -1258,9 +1264,9 @@ function togglePasswordLogin() {
     : "Logowanie login / hasło";
 
   if (willOpen) {
-    setTimeout(() => el("loginInput").focus(), 80);
+    setTimeout(() => el("email").focus(), 80);
   } else {
-    focusQrInput();
+    setTimeout(() => el("qrLoginInput").focus(), 80);
   }
 }
 
@@ -1356,31 +1362,17 @@ function translateLoginError(errorMessage) {
   return "Nie udało się zalogować. Sprawdź login i hasło.";
 }
 
-async function markQrLoginFail(details) {
-  try {
-    await supabaseClient.rpc("qr_login_mark_fail", {
-      target_details: details || null,
-      target_user_agent: navigator.userAgent || null
-    });
-  } catch(e) {}
-}
-
-async function markQrLoginSuccess(row) {
-  try {
-    await supabaseClient.rpc("qr_login_mark_success", {
-      target_user_id: row.user_id,
-      target_user_email: row.user_email,
-      target_token_hint: row.token_hint || null,
-      target_user_agent: navigator.userAgent || null
-    });
-  } catch(e) {}
-}
-
-async function enterStationAfterLogin(user, role, accessToken = "", loginMode = "") {
+async function enterAppAfterLogin(user, role, accessToken, loginMode) {
   currentUser = user;
-  currentRole = role;
   currentAccessToken = accessToken || "";
+  currentRole = role;
   currentLoginMode = loginMode || "";
+
+  if (!hasAccess(currentRole)) {
+    showLoginMessage("❌ Brak dostępu do pakowania stanowiskowego.", "error");
+    sound("bad");
+    return;
+  }
 
   await cleanupPreviousWorkerSessionIfNeeded();
 
@@ -1398,10 +1390,11 @@ async function enterStationAfterLogin(user, role, accessToken = "", loginMode = 
 async function qrLogin() {
   const rawToken = normalizeQrToken(el("qrLoginInput").value);
 
-  setLoginStatus("");
+  el("loginStatus").className = "loginStatus";
+  el("loginStatus").innerText = "";
 
   if (!rawToken) {
-    setLoginStatus("Zeskanuj kod QR pracownika.", "error");
+    showLoginMessage("Zeskanuj kod QR pracownika.", "error");
     sound("bad");
     focusQrInput();
     return;
@@ -1409,62 +1402,115 @@ async function qrLogin() {
 
   el("qrLoginBtn").disabled = true;
   el("qrLoginBtn").innerText = "Sprawdzam QR...";
-  setLoginStatus("⏳ Sprawdzam kod QR...", "info");
+  showLoginMessage("⏳ Sprawdzam kod QR...", "info");
 
   try {
-    const { data, error } = await supabaseClient.rpc("qr_login_lookup", {
-      raw_token: rawToken
+    const res = await fetch(`${PROJECT_URL}/functions/v1/qr-login-session`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": PUBLISHABLE_KEY
+      },
+      body: JSON.stringify({
+        raw_token: rawToken,
+        token: rawToken
+      })
     });
 
-    if (error) {
-      await markQrLoginFail(error.message);
-      setLoginStatus("❌ Nie udało się zalogować QR: " + error.message, "error");
-      sound("bad");
-      return;
+    const json = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(json.error || json.message || "Nie udało się zalogować kodem QR.");
     }
 
-    const row = data && data.length ? data[0] : null;
+    const session = json.session || json.data?.session || json;
+    const accessToken = session.access_token || json.access_token;
+    const refreshToken = session.refresh_token || json.refresh_token;
 
-    if (!row || !row.user_id || !row.user_email) {
-      await markQrLoginFail("Nie znaleziono użytkownika dla tokenu QR.");
-      setLoginStatus("❌ Nieprawidłowy albo wyłączony kod QR.", "error");
-      sound("bad");
-      el("qrLoginInput").value = "";
-      focusQrInput();
-      return;
+    if (!accessToken || !refreshToken) {
+      throw new Error("Funkcja QR nie zwróciła pełnej sesji Supabase.");
     }
 
-    if (!hasAccess(row.user_role)) {
-      await markQrLoginFail("Brak dostępu dla roli: " + row.user_role);
-      setLoginStatus("❌ Ten kod QR nie ma dostępu do pakowania stanowiskowego.", "error");
-      sound("bad");
-      el("qrLoginInput").value = "";
-      focusQrInput();
-      return;
+    const { data: setData, error: setError } = await supabaseClient.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken
+    });
+
+    if (setError) {
+      throw new Error(setError.message);
     }
 
-    await markQrLoginSuccess(row);
+    const user = setData?.user || json.user || json.data?.user;
+
+    if (!user || !user.id || !user.email) {
+      throw new Error("Nie udało się odczytać użytkownika po logowaniu QR.");
+    }
+
+    const role = json.role || json.user_role || json.data?.role || json.data?.user_role || await getUserRole(user.id);
+
+    if (!hasAccess(role)) {
+      await supabaseClient.auth.signOut();
+      throw new Error("Ten kod QR nie ma dostępu do pakowania stanowiskowego.");
+    }
 
     el("qrLoginInput").value = "";
-    setLoginStatus("✅ Zalogowano kodem QR jako: " + displayLogin(row.user_email), "ok");
+    showLoginMessage("✅ Zalogowano kodem QR jako: " + displayLogin(user.email), "ok");
 
-    await enterStationAfterLogin({
-      id: row.user_id,
-      email: row.user_email
-    }, row.user_role, "", "qr");
+    await enterAppAfterLogin(user, role, accessToken, "qr");
 
   } catch (err) {
-    await markQrLoginFail(err.message);
-    setLoginStatus("❌ Błąd logowania QR: " + err.message, "error");
+    showLoginMessage("❌ Nie udało się zalogować QR: " + err.message, "error");
     sound("bad");
+    el("qrLoginInput").value = "";
+    focusQrInput();
   } finally {
     el("qrLoginBtn").disabled = false;
     el("qrLoginBtn").innerText = "Zaloguj kodem QR";
-
-    if (!el("loginScreen").classList.contains("hidden")) {
-      focusQrInput();
-    }
   }
+}
+
+async function login() {
+  showLoginMessage("⏳ Loguję...", "info");
+
+  const email = getEmail(el("email").value);
+  const password = el("password").value;
+
+  if (!email || !password) {
+    showLoginMessage("❌ Wpisz login i hasło.", "error");
+    sound("bad");
+    return;
+  }
+
+  el("loginBtn").disabled = true;
+  el("loginBtn").innerText = "Loguję...";
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  el("loginBtn").disabled = false;
+  el("loginBtn").innerText = "Zaloguj loginem i hasłem";
+
+  if (error) {
+    showLoginMessage("❌ " + translateLoginError(error.message), "error");
+    sound("bad");
+    return;
+  }
+
+  const role = await getUserRole(data.user.id);
+
+  if (!hasAccess(role)) {
+    showLoginMessage("❌ Brak dostępu do pakowania stanowiskowego.", "error");
+    sound("bad");
+    return;
+  }
+
+  showLoginMessage("✅ Zalogowano jako: " + displayLogin(data.user.email), "ok");
+
+  await enterAppAfterLogin(
+    data.user,
+    role,
+    data.session?.access_token || "",
+    "password"
+  );
 }
 
 async function leaveMyStationLine(lineId = null) {
@@ -1508,62 +1554,6 @@ function leaveMyStationLineKeepAlive(lineId = null) {
       })
     });
   } catch (err) {}
-}
-
-el("qrLoginInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") qrLogin();
-});
-
-el("loginInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") el("passwordInput").focus();
-});
-
-el("passwordInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") login();
-});
-
-async function login() {
-  setLoginStatus("⏳ Loguję...", "info");
-
-  const email = getEmail(el("loginInput").value);
-  const password = el("passwordInput").value;
-
-  if (!email || !password) {
-    setLoginStatus("❌ Wpisz login i hasło.", "error");
-    sound("bad");
-    return;
-  }
-
-  el("loginButton").disabled = true;
-  el("loginButton").innerText = "Loguję...";
-
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
-  el("loginButton").disabled = false;
-  el("loginButton").innerText = "Zaloguj loginem i hasłem";
-
-  if (error) {
-    setLoginStatus("❌ " + translateLoginError(error.message), "error");
-    sound("bad");
-    return;
-  }
-
-  const role = await getUserRole(data.user.id);
-
-  if (!hasAccess(role)) {
-    setLoginStatus("❌ Brak dostępu do pakowania stanowiskowego.", "error");
-    sound("bad");
-    return;
-  }
-
-  setLoginStatus("✅ Zalogowano pomyślnie.", "ok");
-
-  await enterStationAfterLogin(
-    data.user,
-    role,
-    data.session?.access_token || "",
-    "password"
-  );
 }
 
 async function logout() {
@@ -1746,10 +1736,6 @@ function showLeaderTab(tab) {
     loadMembers();
   }
 }
-
-el("leaderBagInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") addLeaderBag();
-});
 
 async function getBrakiSessionForBag(bag) {
   const { data, error } = await supabaseClient.rpc("get_bag_braki_session", {
@@ -2757,7 +2743,7 @@ async function restoreExistingSession() {
   currentUser = data.session.user;
   currentAccessToken = data.session.access_token || "";
   currentRole = await getUserRole(currentUser.id);
-  currentLoginMode = "password";
+  currentLoginMode = "session";
 
   if (!hasAccess(currentRole)) {
     await supabaseClient.auth.signOut();
@@ -2775,28 +2761,40 @@ async function restoreExistingSession() {
   await goToModeScreen();
 }
 
-restoreExistingSession();
+el("qrLoginInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") qrLogin();
+});
+
+el("email").addEventListener("keydown", e => {
+  if (e.key === "Enter") el("password").focus();
+});
+
+el("password").addEventListener("keydown", e => {
+  if (e.key === "Enter") login();
+});
+
+el("leaderBagInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") addLeaderBag();
+});
 
 window.addEventListener("click", event => {
   if (event.target.closest("button,input,select,textarea,label")) return;
 
-  if (!el("loginScreen").classList.contains("hidden")) {
-    if (el("passwordLoginBox").classList.contains("hidden")) {
-      focusQrInput();
+  setTimeout(() => {
+    if (!el("loginScreen").classList.contains("hidden")) {
+      if (el("passwordLoginBox").classList.contains("hidden")) {
+        el("qrLoginInput").focus();
+      }
     }
-  }
 
-  if (currentMode === "leader" && leaderActiveTab === "scan" && !el("leaderScreen").classList.contains("hidden")) {
-    setTimeout(() => el("leaderBagInput")?.focus(), 50);
-  }
+    if (currentMode === "leader" && leaderActiveTab === "scan" && !el("leaderScreen").classList.contains("hidden")) {
+      el("leaderBagInput")?.focus();
+    }
 
-  if (currentMode === "worker" && !el("workerScreen").classList.contains("hidden") && !currentBadScan) {
-    setTimeout(() => el("trayScanInput")?.focus(), 50);
-  }
-});
-
-window.addEventListener("DOMContentLoaded", () => {
-  focusQrInput();
+    if (currentMode === "worker" && !el("workerScreen").classList.contains("hidden") && !currentBadScan) {
+      el("trayScanInput")?.focus();
+    }
+  }, 50);
 });
 
 window.addEventListener("pagehide", () => {
@@ -2809,6 +2807,11 @@ window.addEventListener("beforeunload", () => {
   if (currentMode === "worker" && currentLineId) {
     leaveMyStationLineKeepAlive(currentLineId);
   }
+});
+
+window.addEventListener("DOMContentLoaded", async () => {
+  focusQrInput();
+  await restoreExistingSession();
 });
 </script>
 
