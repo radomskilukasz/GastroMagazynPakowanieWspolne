@@ -4,7 +4,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="logo-removebg-preview.png">
   <link rel="icon" type="image/png" sizes="16x16" href="logo-removebg-preview.png">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Pakowanie stanowiskowe</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -32,6 +32,7 @@
       margin:0;
       padding:22px;
       color:var(--text);
+      -webkit-text-size-adjust:100%;
     }
 
     .hidden { display:none !important; }
@@ -65,6 +66,7 @@
       background:var(--blue);
       color:white;
       transition:.15s ease;
+      touch-action:manipulation;
     }
 
     button:hover { background:var(--blue-dark); }
@@ -200,9 +202,7 @@
       font-weight:bold;
     }
 
-    .togglePasswordBtn:hover {
-      background:#d1d5db;
-    }
+    .togglePasswordBtn:hover { background:#d1d5db; }
 
     .passwordLoginBox {
       margin-top:18px;
@@ -265,23 +265,9 @@
       white-space:pre-wrap;
     }
 
-    .loginStatus.error {
-      display:block;
-      background:#fee2e2;
-      color:#991b1b;
-    }
-
-    .loginStatus.ok {
-      display:block;
-      background:#dcfce7;
-      color:#166534;
-    }
-
-    .loginStatus.info {
-      display:block;
-      background:#eff6ff;
-      color:#1d4ed8;
-    }
+    .loginStatus.error { display:block; background:#fee2e2; color:#991b1b; }
+    .loginStatus.ok { display:block; background:#dcfce7; color:#166534; }
+    .loginStatus.info { display:block; background:#eff6ff; color:#1d4ed8; }
 
     .formGroup { margin-bottom:16px; }
 
@@ -303,27 +289,10 @@
       line-height:1.35;
     }
 
-    .statusBox.ok {
-      background:#dcfce7;
-      border-color:#bbf7d0;
-      color:#166534;
-    }
-
-    .statusBox.bad {
-      background:#fee2e2;
-      border-color:#fecaca;
-      color:#991b1b;
-    }
-
-    .statusBox.warn {
-      background:#fffbeb;
-      border-color:#fde68a;
-      color:#92400e;
-    }
-
-    .statusBox.muted {
-      color:var(--muted);
-    }
+    .statusBox.ok { background:#dcfce7; border-color:#bbf7d0; color:#166534; }
+    .statusBox.bad { background:#fee2e2; border-color:#fecaca; color:#991b1b; }
+    .statusBox.warn { background:#fffbeb; border-color:#fde68a; color:#92400e; }
+    .statusBox.muted { color:var(--muted); }
 
     .topbar {
       background:white;
@@ -338,8 +307,8 @@
       flex-wrap:wrap;
     }
 
-    .topbarTitle { display:flex; gap:18px; align-items:center; }
-    .topbarLogo { width:70px; height:auto; }
+    .topbarTitle { display:flex; gap:18px; align-items:center; min-width:0; }
+    .topbarLogo { width:70px; height:auto; flex:0 0 auto; }
     .topbar h1 { margin:0; font-size:36px; letter-spacing:-.03em; }
 
     .topbarActions { display:flex; gap:10px; flex-wrap:wrap; }
@@ -372,15 +341,8 @@
       margin-bottom:18px;
     }
 
-    .leaderTabs button {
-      background:#e5e7eb;
-      color:#111827;
-    }
-
-    .leaderTabs button.active {
-      background:var(--blue);
-      color:white;
-    }
+    .leaderTabs button { background:#e5e7eb; color:#111827; }
+    .leaderTabs button.active { background:var(--blue); color:white; }
 
     .leaderScanLayout {
       display:grid;
@@ -439,28 +401,13 @@
     }
 
     .queueItem.badBag,
-    .historyItem.badBag {
-      border-color:#fecaca;
-      background:#fff1f2;
-    }
-
+    .historyItem.badBag { border-color:#fecaca; background:#fff1f2; }
     .queueItem.doneBag,
-    .historyItem.doneBag {
-      border-color:#bbf7d0;
-      background:#f0fdf4;
-    }
-
+    .historyItem.doneBag { border-color:#bbf7d0; background:#f0fdf4; }
     .queueItem.brakiBag,
-    .historyItem.brakiBag {
-      border-color:#fde68a;
-      background:#fffbeb;
-    }
-
+    .historyItem.brakiBag { border-color:#fde68a; background:#fffbeb; }
     .historyItem.replacedBag,
-    .historyItem.cancelledBag {
-      border-color:#fed7aa;
-      background:#fff7ed;
-    }
+    .historyItem.cancelledBag { border-color:#fed7aa; background:#fff7ed; }
 
     .memberItem {
       border:1px solid var(--border);
@@ -502,10 +449,7 @@
       white-space:nowrap;
     }
 
-    .progressPill.warnPill {
-      background:#fef3c7;
-      color:#92400e;
-    }
+    .progressPill.warnPill { background:#fef3c7; color:#92400e; }
 
     .mealGrid {
       display:grid;
@@ -644,9 +588,7 @@
       margin-top:12px;
     }
 
-    .taskActions.threeActions {
-      grid-template-columns:1fr 1fr 1fr;
-    }
+    .taskActions.threeActions { grid-template-columns:1fr 1fr 1fr; }
 
     .nextList { display:flex; flex-direction:column; gap:10px; }
 
@@ -687,15 +629,8 @@
       box-shadow:0 25px 80px rgba(0,0,0,.25);
     }
 
-    .confirmModal {
-      max-width:650px;
-      text-align:left;
-    }
-
-    .confirmModal h2 {
-      font-size:30px;
-      margin:0 0 12px;
-    }
+    .confirmModal { max-width:650px; text-align:left; }
+    .confirmModal h2 { font-size:30px; margin:0 0 12px; }
 
     .confirmText {
       font-size:20px;
@@ -722,27 +657,11 @@
       border-radius:10px;
     }
 
-    .btnCancel {
-      background:#e5e7eb;
-      color:#111827;
-    }
-
+    .btnCancel { background:#e5e7eb; color:#111827; }
     .btnCancel:hover { background:#d1d5db; }
-
-    .btnReplace {
-      background:#f97316;
-      color:white;
-      border:none;
-    }
-
+    .btnReplace { background:#f97316; color:white; border:none; }
     .btnReplace:hover { background:#ea580c; }
-
-    .btnAnother {
-      background:#2563eb;
-      color:white;
-      border:none;
-    }
-
+    .btnAnother { background:#2563eb; color:white; border:none; }
     .btnAnother:hover { background:#1d4ed8; }
 
     .modalHeader {
@@ -804,10 +723,7 @@
       margin-bottom:8px;
     }
 
-    .controlValue {
-      font-size:30px;
-      font-weight:bold;
-    }
+    .controlValue { font-size:30px; font-weight:bold; }
 
     .liveDot {
       display:inline-block;
@@ -852,6 +768,48 @@
       font-size:15px;
       padding:10px 12px;
       border-radius:10px;
+    }
+
+    @media (min-width:701px) and (max-width:1194px) {
+      body { padding:10px; }
+      .shell { max-width:1180px; }
+      .topbar { padding:12px 16px; margin-bottom:12px; border-radius:20px; }
+      .topbarLogo { width:52px; }
+      .topbar h1 { font-size:27px; }
+      .topbarActions button { min-width:132px; font-size:16px; padding:11px 12px; border-radius:12px; }
+      .card, .taskCard { padding:16px 18px; border-radius:20px; margin-bottom:12px; }
+      .leaderControlGrid { grid-template-columns:repeat(4, 1fr); gap:10px; margin-bottom:12px; }
+      .leaderControlCard { padding:12px; border-radius:16px; }
+      .controlLabel { font-size:11px; margin-bottom:4px; }
+      .controlValue { font-size:22px; }
+      .leaderTabs { gap:8px; margin-bottom:12px; }
+      .leaderTabs button { font-size:17px; padding:12px; border-radius:12px; }
+      .leaderScanLayout { grid-template-columns:360px minmax(0, 1fr); gap:12px; }
+      .leaderMembersLayout { grid-template-columns:1fr 390px; gap:12px; }
+      .workerLayout { grid-template-columns:minmax(0, 1fr) 330px; gap:12px; }
+      h2 { font-size:22px; margin-bottom:8px; }
+      p { margin-bottom:10px; }
+      .scanInput { font-size:25px; padding:12px; min-height:52px; border-radius:12px; }
+      .statusBox { margin-top:10px; padding:10px 12px; min-height:40px; font-size:15px; }
+      .assignmentBanner, .brakiBanner { font-size:16px; padding:11px 12px; margin-bottom:10px; border-radius:15px; }
+      .taskHeader { gap:12px; margin-bottom:12px; }
+      .taskBag { font-size:30px; }
+      .taskMeal { font-size:21px; }
+      .taskMeta { gap:8px; margin-bottom:10px; }
+      .metaBox { padding:10px 12px; border-radius:14px; }
+      .metaLabel { font-size:11px; }
+      .metaValue { font-size:17px; }
+      .taskActions { gap:8px; margin-top:8px; }
+      .taskActions button { font-size:16px; padding:11px 8px; border-radius:12px; }
+      .emptyState { font-size:18px; padding:28px 12px; }
+      .queueItem, .historyItem, .memberItem, .nextItem { padding:11px 12px; border-radius:14px; }
+      .bagCode { font-size:20px; }
+      .progressPill { padding:6px 10px; font-size:15px; }
+      .mealGrid { grid-template-columns:1fr 1fr; gap:8px; }
+      .mealOption { padding:10px; border-radius:12px; }
+      table { font-size:14px; }
+      th, td { padding:8px; }
+      .modal { padding:20px; border-radius:20px; max-height:88vh; }
     }
 
     @media(max-width:900px){
@@ -1031,7 +989,7 @@
           <h2>📦 Skanuj torby do kolejki</h2>
           <p class="muted">Na stanowisku może być maksymalnie 10 aktywnych toreb. Torby ze statusem BRAKI otwierają się automatycznie do dopakowania.</p>
 
-          <input id="leaderBagInput" class="scanInput" placeholder="Zeskanuj torbę">
+          <input id="leaderBagInput" class="scanInput" placeholder="Zeskanuj torbę" autocomplete="off">
           <p id="leaderStatus" class="statusBox muted"></p>
 
           <div class="grid2">
@@ -1154,6 +1112,22 @@ const SESSION_LINE_KEY = "pakowanie_station_line_id";
 
 function el(id) { return document.getElementById(id); }
 
+function normalizeQr(value) {
+  return String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "")
+    .replaceAll("Ś", "S")
+    .replaceAll("Ą", "A")
+    .replaceAll("Ć", "C")
+    .replaceAll("Ę", "E")
+    .replaceAll("Ł", "L")
+    .replaceAll("Ń", "N")
+    .replaceAll("Ó", "O")
+    .replaceAll("Ź", "Z")
+    .replaceAll("Ż", "Z");
+}
+
 function setStationSession(mode, lineId = "") {
   try {
     if (mode) sessionStorage.setItem(SESSION_MODE_KEY, mode);
@@ -1255,7 +1229,6 @@ function showLoginMessage(text, type = "error") {
 function togglePasswordLogin() {
   const box = el("passwordLoginBox");
   const btn = el("togglePasswordLoginBtn");
-
   const willOpen = box.classList.contains("hidden");
 
   box.classList.toggle("hidden", !willOpen);
@@ -1263,11 +1236,8 @@ function togglePasswordLogin() {
     ? "Ukryj logowanie login / hasło"
     : "Logowanie login / hasło";
 
-  if (willOpen) {
-    setTimeout(() => el("email").focus(), 80);
-  } else {
-    setTimeout(() => el("qrLoginInput").focus(), 80);
-  }
+  if (willOpen) setTimeout(() => el("email").focus(), 80);
+  else setTimeout(() => el("qrLoginInput").focus(), 80);
 }
 
 function focusQrInput() {
@@ -1275,6 +1245,20 @@ function focusQrInput() {
     el("qrLoginInput")?.focus();
     el("qrLoginInput")?.click();
   }, 80);
+}
+
+function focusLeaderBagInput() {
+  setTimeout(() => {
+    el("leaderBagInput")?.focus();
+    el("leaderBagInput")?.click();
+  }, 60);
+}
+
+function focusTrayScanInput() {
+  setTimeout(() => {
+    el("trayScanInput")?.focus();
+    el("trayScanInput")?.click();
+  }, 60);
 }
 
 function showChoiceModal({ title, text, details = "", buttons = [] }) {
@@ -1436,11 +1420,9 @@ async function qrLogin() {
       refresh_token: refreshToken
     });
 
-    if (setError) {
-      throw new Error(setError.message);
-    }
+    if (setError) throw new Error(setError.message);
 
-    const user = setData?.user || json.user || json.data?.user;
+    const user = setData?.user || setData?.session?.user || json.user || json.data?.user;
 
     if (!user || !user.id || !user.email) {
       throw new Error("Nie udało się odczytać użytkownika po logowaniu QR.");
@@ -1558,9 +1540,7 @@ function leaveMyStationLineKeepAlive(lineId = null) {
 
 async function logout() {
   stopRefresh();
-
   await leaveCurrentWorkerIfNeeded();
-
   clearStationSession();
 
   try {
@@ -1577,7 +1557,6 @@ function hideAllMainScreens() {
 
 async function goToModeScreen() {
   await leaveCurrentWorkerIfNeeded();
-
   stopRefresh();
 
   currentMode = null;
@@ -1589,6 +1568,7 @@ async function goToModeScreen() {
   taskList = [];
   currentTask = null;
   currentBadScan = null;
+  isBusy = false;
 
   clearStationSession();
 
@@ -1730,11 +1710,8 @@ function showLeaderTab(tab) {
   el("leaderScanTabBtn").classList.toggle("active", tab === "scan");
   el("leaderMembersTabBtn").classList.toggle("active", tab === "members");
 
-  if (tab === "scan") {
-    setTimeout(() => el("leaderBagInput")?.focus(), 80);
-  } else {
-    loadMembers();
-  }
+  if (tab === "scan") focusLeaderBagInput();
+  else loadMembers();
 }
 
 async function getBrakiSessionForBag(bag) {
@@ -1758,8 +1735,10 @@ async function ensureLatestStationBagStates(bagQr) {
 
     if (error || !data) return;
 
+    const normalizedBag = normalizeQr(bagQr);
+
     const rows = data
-      .filter(x => String(x.bag_qr || "") === String(bagQr || ""))
+      .filter(x => normalizeQr(x.bag_qr) === normalizedBag)
       .filter(x => ["queued", "in_progress"].includes(String(x.status || "")))
       .sort((a, b) => Number(b.queue_position || 0) - Number(a.queue_position || 0));
 
@@ -1776,11 +1755,13 @@ async function ensureLatestStationBagStates(bagQr) {
 }
 
 async function addBagToLineInternal(bag, allowDuplicate = false, options = {}) {
+  const normalizedBag = normalizeQr(bag);
+
   setStatus("leaderStatus", options.brakiMode ? "⏳ Otwieram torbę BRAKI do dopakowania..." : "⏳ Dodaję torbę do kolejki...", "muted");
 
   const { data, error } = await supabaseClient.rpc("add_bag_to_station_line", {
     target_line_id: currentLineId,
-    target_bag_qr: bag,
+    target_bag_qr: normalizedBag,
     allow_duplicate: allowDuplicate
   });
 
@@ -1791,13 +1772,13 @@ async function addBagToLineInternal(bag, allowDuplicate = false, options = {}) {
   }
 
   if (data === "OK") {
-    await ensureLatestStationBagStates(bag);
+    await ensureLatestStationBagStates(normalizedBag);
 
     setStatus(
       "leaderStatus",
       options.brakiMode
-        ? "🟡 Otworzono torbę BRAKI do dopakowania: " + bag
-        : "✅ Dodano torbę: " + bag,
+        ? "🟡 Otworzono torbę BRAKI do dopakowania: " + normalizedBag
+        : "✅ Dodano torbę: " + normalizedBag,
       options.brakiMode ? "warn" : "ok"
     );
 
@@ -1808,17 +1789,17 @@ async function addBagToLineInternal(bag, allowDuplicate = false, options = {}) {
   }
 
   if (data === "BAG_ALREADY_ACTIVE") {
-    await handleDuplicateBag(bag, "active");
+    await handleDuplicateBag(normalizedBag, "active");
     return false;
   }
 
   if (data === "BAG_ALREADY_PACKED") {
-    await handleDuplicateBag(bag, "packed");
+    await handleDuplicateBag(normalizedBag, "packed");
     return false;
   }
 
   if (data === "BAG_NOT_FOUND") {
-    setStatus("leaderStatus", "❌ Brak torby w planie: " + bag, "bad");
+    setStatus("leaderStatus", "❌ Brak torby w planie: " + normalizedBag, "bad");
     sound("bad");
     return false;
   }
@@ -1835,7 +1816,9 @@ async function addBagToLineInternal(bag, allowDuplicate = false, options = {}) {
 }
 
 async function addLeaderBag() {
-  const bag = el("leaderBagInput").value.trim();
+  const bag = normalizeQr(el("leaderBagInput").value);
+
+  el("leaderBagInput").value = bag;
 
   if (!bag || !currentLineId || isBusy) return;
 
@@ -1874,11 +1857,12 @@ async function addLeaderBag() {
 
   } finally {
     isBusy = false;
-    setTimeout(() => el("leaderBagInput")?.focus(), 80);
+    focusLeaderBagInput();
   }
 }
 
 async function handleDuplicateBag(bag, duplicateType = "active") {
+  const normalizedBag = normalizeQr(bag);
   sound("warn");
 
   const isPacked = duplicateType === "packed";
@@ -1906,12 +1890,12 @@ async function handleDuplicateBag(bag, duplicateType = "active") {
     text: isPacked
       ? "Lider zeskanował torbę, która ma już zakończony zapis. Jeżeli to torba BRAKI, zostanie otwarta automatycznie — tutaj chodzi o zwykły zakończony zapis."
       : "Lider zeskanował torbę, która jest już aktywna na stanowisku. Możesz anulować albo dodać kolejną fizyczną torbę z tym samym kodem.",
-    details: `Kod torby: <b>${escapeHtml(bag)}</b><br><br>Wybierz, co chcesz zrobić z tym skanem.`,
+    details: `Kod torby: <b>${escapeHtml(normalizedBag)}</b><br><br>Wybierz, co chcesz zrobić z tym skanem.`,
     buttons
   });
 
   if (choice === "duplicate") {
-    await addBagToLineInternal(bag, true);
+    await addBagToLineInternal(normalizedBag, true);
     return;
   }
 
@@ -1920,7 +1904,7 @@ async function handleDuplicateBag(bag, duplicateType = "active") {
 
     const { data, error } = await supabaseClient.rpc("replace_bag_on_station_line", {
       target_line_id: currentLineId,
-      target_bag_qr: bag
+      target_bag_qr: normalizedBag
     });
 
     isBusy = false;
@@ -1931,9 +1915,9 @@ async function handleDuplicateBag(bag, duplicateType = "active") {
       return;
     }
 
-    await ensureLatestStationBagStates(bag);
+    await ensureLatestStationBagStates(normalizedBag);
 
-    setStatus("leaderStatus", "✅ Torba została dodana do poprawy: " + bag, "ok");
+    setStatus("leaderStatus", "✅ Torba została dodana do poprawy: " + normalizedBag, "ok");
     el("leaderBagInput").value = "";
     await refreshLeaderData();
     sound("ok");
@@ -1941,7 +1925,7 @@ async function handleDuplicateBag(bag, duplicateType = "active") {
   }
 
   setStatus("leaderStatus", "⚠️ Nie dodano torby.", "warn");
-  el("leaderBagInput").focus();
+  focusLeaderBagInput();
 }
 
 async function refreshLeaderData() {
@@ -2423,7 +2407,7 @@ async function loadTasks() {
     return;
   }
 
-  taskList = data || [];
+  taskList = (data || []).filter(x => !["ok", "brak", "forced_bad"].includes(String(x.status || "").toLowerCase()));
   currentTask = taskList[0] || null;
   renderWorkerTask();
 }
@@ -2481,8 +2465,8 @@ function renderWorkerTask(errorMessage = "") {
     ${badScanHtml}
 
     <div class="taskActions threeActions">
-      <button class="warning" onclick="markCurrentTaskBrak()" ${currentBadScan ? "disabled" : ""}>🟡 BRAKI / do dopakowania</button>
-      <button class="danger" onclick="forceBadCurrentTask()">❌ Zapakuj jako niepoprawną</button>
+      <button id="brakTaskBtn" class="warning" onclick="markCurrentTaskBrak()" ${currentBadScan ? "disabled" : ""}>🟡 BRAKI / do dopakowania</button>
+      <button id="badTaskBtn" class="danger" onclick="forceBadCurrentTask()">❌ Zapakuj jako niepoprawną</button>
       <button class="lightBtn" onclick="loadTasks()">Odśwież</button>
     </div>
   `;
@@ -2490,7 +2474,7 @@ function renderWorkerTask(errorMessage = "") {
   const scanInput = el("trayScanInput");
 
   if (scanInput && !currentBadScan) {
-    scanInput.focus();
+    focusTrayScanInput();
     scanInput.addEventListener("keydown", e => {
       if (e.key === "Enter") scanCurrentTray();
     });
@@ -2524,7 +2508,8 @@ async function scanCurrentTray() {
   if (!currentTask || isBusy || currentBadScan) return;
 
   const input = el("trayScanInput");
-  const scannedValue = input.value.trim();
+  const scannedValue = normalizeQr(input.value);
+  input.value = scannedValue;
 
   if (!scannedValue) return;
 
@@ -2569,6 +2554,14 @@ async function scanCurrentTray() {
     return;
   }
 
+  if (data === "ALREADY_DONE") {
+    currentBadScan = null;
+    sound("warn");
+    await tryCloseCurrentBag();
+    await loadTasks();
+    return;
+  }
+
   renderWorkerTask("❌ Nieoczekiwany status: " + data);
   sound("bad");
 }
@@ -2599,28 +2592,21 @@ async function removeBadScanAndRetry() {
 async function markCurrentTaskBrak() {
   if (!currentTask || isBusy || currentBadScan) return;
 
-  const choice = await showChoiceModal({
-    title: "🟡 Oznaczyć jako BRAKI?",
-    text: "Ta pozycja zostanie oznaczona jako brakująca. Torba trafi do dopakowania i po ponownym zeskanowaniu będzie można dołożyć brakującą tackę bez skanowania całej torby od nowa.",
-    details: `
-      Torba: <b>${escapeHtml(currentTask.bag_qr)}</b><br>
-      Posiłek: <b>${escapeHtml(currentTask.meal)}</b><br>
-      Brakująca tacka: <b>${escapeHtml(currentTask.tray_qr || "-")}</b><br><br>
-      Używaj tego tylko wtedy, gdy towaru faktycznie nie ma fizycznie na stanowisku.
-    `,
-    buttons: [
-      { label: "Anuluj i wróć do skanowania", value: "cancel", className: "btnCancel" },
-      { label: "Oznacz BRAKI / do dopakowania", value: "braki", className: "btnReplace" }
-    ]
-  });
-
-  if (choice !== "braki") return;
-
   isBusy = true;
 
+  const brakBtn = el("brakTaskBtn");
+  const badBtn = el("badTaskBtn");
+  if (brakBtn) {
+    brakBtn.disabled = true;
+    brakBtn.innerText = "Zapisuję BRAKI...";
+  }
+  if (badBtn) badBtn.disabled = true;
+
+  const taskSnapshot = { ...currentTask };
+
   const { data, error } = await supabaseClient.rpc("mark_station_task_brak", {
-    target_bag_id: currentTask.bag_id,
-    target_plan_item_id: currentTask.plan_item_id
+    target_bag_id: taskSnapshot.bag_id,
+    target_plan_item_id: taskSnapshot.plan_item_id
   });
 
   isBusy = false;
@@ -2632,9 +2618,10 @@ async function markCurrentTaskBrak() {
   }
 
   currentBadScan = null;
+  currentTask = null;
   sound("warn");
 
-  await tryCloseCurrentBag();
+  await tryCloseBagById(taskSnapshot.bag_id);
   await loadTasks();
 }
 
@@ -2660,9 +2647,11 @@ async function forceBadCurrentTask() {
 
   isBusy = true;
 
+  const taskSnapshot = { ...currentTask };
+
   const { data, error } = await supabaseClient.rpc("force_station_task_bad", {
-    target_bag_id: currentTask.bag_id,
-    target_plan_item_id: currentTask.plan_item_id
+    target_bag_id: taskSnapshot.bag_id,
+    target_plan_item_id: taskSnapshot.plan_item_id
   });
 
   isBusy = false;
@@ -2674,17 +2663,18 @@ async function forceBadCurrentTask() {
   }
 
   currentBadScan = null;
+  currentTask = null;
   sound("warn");
 
-  await tryCloseCurrentBag();
+  await tryCloseBagById(taskSnapshot.bag_id);
   await loadTasks();
 }
 
-async function tryCloseCurrentBag() {
-  if (!currentTask) return;
+async function tryCloseBagById(bagId) {
+  if (!bagId) return;
 
   const { data, error } = await supabaseClient.rpc("try_close_station_bag", {
-    target_bag_id: currentTask.bag_id
+    target_bag_id: bagId
   });
 
   if (error) {
@@ -2694,17 +2684,8 @@ async function tryCloseCurrentBag() {
 
   const result = normalizeStatus(data);
 
-  if (result === "POPRAWNA") {
-    sound("done");
-  }
-
-  if (result === "NIEPOPRAWNA") {
-    sound("done");
-  }
-
-  if (result === "BRAKI") {
-    sound("warn");
-  }
+  if (result === "POPRAWNA" || result === "NIEPOPRAWNA") sound("done");
+  if (result === "BRAKI") sound("warn");
 
   if (["POPRAWNA", "NIEPOPRAWNA", "BRAKI"].includes(result)) {
     await Promise.allSettled([
@@ -2712,6 +2693,11 @@ async function tryCloseCurrentBag() {
       loadLineHistory()
     ]);
   }
+}
+
+async function tryCloseCurrentBag() {
+  if (!currentTask) return;
+  await tryCloseBagById(currentTask.bag_id);
 }
 
 function startLeaderRefresh() {
@@ -2724,7 +2710,6 @@ function startLeaderRefresh() {
 
 function startWorkerRefresh() {
   stopRefresh();
-
   refreshTimer = setInterval(loadTasks, 3000);
 }
 
@@ -2771,6 +2756,11 @@ el("email").addEventListener("keydown", e => {
 
 el("password").addEventListener("keydown", e => {
   if (e.key === "Enter") login();
+});
+
+el("leaderBagInput").addEventListener("input", e => {
+  const normalized = normalizeQr(e.target.value);
+  if (e.target.value !== normalized) e.target.value = normalized;
 });
 
 el("leaderBagInput").addEventListener("keydown", e => {
