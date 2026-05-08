@@ -1844,7 +1844,7 @@ async function addLeaderBag() {
     const brakiSession = await getBrakiSessionForBag(bag);
 
     if (brakiSession) {
-      await addBagToLineInternal(bag, true, { brakiMode:true, brakiSession });
+      await addBagToLineInternal(bag, false, { brakiMode:true, brakiSession });
       return;
     }
 
