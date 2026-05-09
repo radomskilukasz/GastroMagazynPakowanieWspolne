@@ -502,18 +502,6 @@
       line-height:1.45;
     }
 
-    .brakiBanner {
-      background:#fffbeb;
-      border:2px solid #fde68a;
-      color:#92400e;
-      border-radius:20px;
-      padding:16px;
-      margin-bottom:18px;
-      font-weight:bold;
-      font-size:20px;
-      line-height:1.45;
-    }
-
     .taskHeader {
       display:grid;
       grid-template-columns:1fr auto;
@@ -770,48 +758,6 @@
       border-radius:10px;
     }
 
-    @media (min-width:701px) and (max-width:1194px) {
-      body { padding:10px; }
-      .shell { max-width:1180px; }
-      .topbar { padding:12px 16px; margin-bottom:12px; border-radius:20px; }
-      .topbarLogo { width:52px; }
-      .topbar h1 { font-size:27px; }
-      .topbarActions button { min-width:132px; font-size:16px; padding:11px 12px; border-radius:12px; }
-      .card, .taskCard { padding:16px 18px; border-radius:20px; margin-bottom:12px; }
-      .leaderControlGrid { grid-template-columns:repeat(4, 1fr); gap:10px; margin-bottom:12px; }
-      .leaderControlCard { padding:12px; border-radius:16px; }
-      .controlLabel { font-size:11px; margin-bottom:4px; }
-      .controlValue { font-size:22px; }
-      .leaderTabs { gap:8px; margin-bottom:12px; }
-      .leaderTabs button { font-size:17px; padding:12px; border-radius:12px; }
-      .leaderScanLayout { grid-template-columns:360px minmax(0, 1fr); gap:12px; }
-      .leaderMembersLayout { grid-template-columns:1fr 390px; gap:12px; }
-      .workerLayout { grid-template-columns:minmax(0, 1fr) 330px; gap:12px; }
-      h2 { font-size:22px; margin-bottom:8px; }
-      p { margin-bottom:10px; }
-      .scanInput { font-size:25px; padding:12px; min-height:52px; border-radius:12px; }
-      .statusBox { margin-top:10px; padding:10px 12px; min-height:40px; font-size:15px; }
-      .assignmentBanner, .brakiBanner { font-size:16px; padding:11px 12px; margin-bottom:10px; border-radius:15px; }
-      .taskHeader { gap:12px; margin-bottom:12px; }
-      .taskBag { font-size:30px; }
-      .taskMeal { font-size:21px; }
-      .taskMeta { gap:8px; margin-bottom:10px; }
-      .metaBox { padding:10px 12px; border-radius:14px; }
-      .metaLabel { font-size:11px; }
-      .metaValue { font-size:17px; }
-      .taskActions { gap:8px; margin-top:8px; }
-      .taskActions button { font-size:16px; padding:11px 8px; border-radius:12px; }
-      .emptyState { font-size:18px; padding:28px 12px; }
-      .queueItem, .historyItem, .memberItem, .nextItem { padding:11px 12px; border-radius:14px; }
-      .bagCode { font-size:20px; }
-      .progressPill { padding:6px 10px; font-size:15px; }
-      .mealGrid { grid-template-columns:1fr 1fr; gap:8px; }
-      .mealOption { padding:10px; border-radius:12px; }
-      table { font-size:14px; }
-      th, td { padding:8px; }
-      .modal { padding:20px; border-radius:20px; max-height:88vh; }
-    }
-
     @media(max-width:900px){
       .leaderControlGrid { grid-template-columns:1fr 1fr; }
     }
@@ -821,34 +767,417 @@
     }
 
     @media(max-width:1300px){
-      .leaderScanLayout, .leaderMembersLayout { grid-template-columns:1fr; }
+      .leaderScanLayout,
+      .leaderMembersLayout {
+        grid-template-columns:1fr;
+      }
     }
 
     @media(max-width:1100px){
-      .workerLayout, .grid2, .modeGrid { grid-template-columns:1fr; }
-      .workerLayout { display:flex; flex-direction:column; }
-      .mealGrid { grid-template-columns:1fr 1fr; }
-      .taskActions.threeActions { grid-template-columns:1fr; }
+      .workerLayout,
+      .grid2,
+      .modeGrid {
+        grid-template-columns:1fr;
+      }
+
+      .workerLayout {
+        display:flex;
+        flex-direction:column;
+      }
+
+      .mealGrid {
+        grid-template-columns:1fr 1fr;
+      }
+
+      .taskActions.threeActions {
+        grid-template-columns:1fr;
+      }
     }
 
     @media(max-width:700px){
       body { padding:12px; }
-      .card, .loginCard, .taskCard { padding:20px; }
-      .topbar { padding:18px; }
-      .topbarTitle { width:100%; }
-      .topbar h1 { font-size:28px; }
-      .topbarActions { width:100%; }
-      .topbarActions button { width:100%; }
-      .taskHeader { grid-template-columns:1fr; }
-      .taskMeal { text-align:left; }
-      .taskBag { font-size:34px; }
-      .taskMeta { grid-template-columns:1fr; }
-      .taskActions { grid-template-columns:1fr; }
-      .mealGrid { grid-template-columns:1fr; }
-      .leaderTabs { grid-template-columns:1fr; }
-      .memberItem { grid-template-columns:1fr; }
-      .memberActions { justify-content:stretch; }
-      .memberActions button { width:100%; }
+
+      .card,
+      .loginCard,
+      .taskCard {
+        padding:20px;
+      }
+
+      .topbar {
+        padding:18px;
+      }
+
+      .topbarTitle {
+        width:100%;
+      }
+
+      .topbar h1 {
+        font-size:28px;
+      }
+
+      .topbarActions {
+        width:100%;
+      }
+
+      .topbarActions button {
+        width:100%;
+      }
+
+      .taskHeader {
+        grid-template-columns:1fr;
+      }
+
+      .taskMeal {
+        text-align:left;
+      }
+
+      .taskBag {
+        font-size:34px;
+      }
+
+      .taskMeta {
+        grid-template-columns:1fr;
+      }
+
+      .taskActions {
+        grid-template-columns:1fr;
+      }
+
+      .mealGrid {
+        grid-template-columns:1fr;
+      }
+
+      .leaderTabs {
+        grid-template-columns:1fr;
+      }
+
+      .memberItem {
+        grid-template-columns:1fr;
+      }
+
+      .memberActions {
+        justify-content:stretch;
+      }
+
+      .memberActions button {
+        width:100%;
+      }
+    }
+
+    @media (min-width:701px) and (max-width:1194px) {
+      body {
+        padding:10px;
+      }
+
+      .shell {
+        max-width:1180px;
+      }
+
+      .topbar {
+        padding:12px 16px;
+        margin-bottom:12px;
+        border-radius:20px;
+        gap:12px;
+      }
+
+      .topbarLogo {
+        width:52px;
+      }
+
+      .topbar h1 {
+        font-size:27px;
+      }
+
+      .topbarTitle {
+        gap:12px;
+      }
+
+      .topbarActions {
+        gap:8px;
+      }
+
+      .topbarActions button {
+        min-width:132px;
+        font-size:16px;
+        padding:11px 12px;
+        border-radius:12px;
+      }
+
+      .card,
+      .taskCard {
+        padding:16px 18px;
+        border-radius:20px;
+        margin-bottom:12px;
+      }
+
+      .leaderControlGrid {
+        grid-template-columns:repeat(4, minmax(0, 1fr));
+        gap:10px;
+        margin-bottom:12px;
+      }
+
+      .leaderControlCard {
+        padding:12px;
+        border-radius:16px;
+      }
+
+      .controlLabel {
+        font-size:11px;
+        margin-bottom:4px;
+      }
+
+      .controlValue {
+        font-size:22px;
+      }
+
+      .leaderTabs {
+        grid-template-columns:1fr 1fr;
+        gap:8px;
+        margin-bottom:12px;
+      }
+
+      .leaderTabs button {
+        font-size:17px;
+        padding:12px;
+        border-radius:12px;
+      }
+
+      .leaderScanLayout {
+        display:grid;
+        grid-template-columns:360px minmax(0, 1fr);
+        gap:12px;
+      }
+
+      .leaderMembersLayout {
+        display:grid;
+        grid-template-columns:minmax(0, 1fr) 390px;
+        gap:12px;
+      }
+
+      .workerLayout {
+        display:grid;
+        grid-template-columns:minmax(0, 1fr) 330px;
+        gap:12px;
+      }
+
+      .grid2 {
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+      }
+
+      .modeGrid {
+        grid-template-columns:1fr 1fr;
+        gap:12px;
+      }
+
+      .modeCard {
+        padding:20px;
+        border-radius:18px;
+      }
+
+      .modeCard h2 {
+        font-size:24px;
+      }
+
+      h2 {
+        font-size:22px;
+        margin-bottom:8px;
+      }
+
+      p {
+        margin-bottom:10px;
+      }
+
+      input,
+      select {
+        font-size:17px;
+        padding:11px 12px;
+        min-height:48px;
+        border-radius:12px;
+      }
+
+      button {
+        font-size:17px;
+        padding:12px;
+        border-radius:12px;
+      }
+
+      .scanInput {
+        font-size:25px;
+        padding:12px;
+        min-height:52px;
+        border-radius:12px;
+      }
+
+      .statusBox {
+        margin-top:10px;
+        padding:10px 12px;
+        min-height:40px;
+        font-size:15px;
+      }
+
+      .assignmentBanner {
+        font-size:16px;
+        padding:11px 12px;
+        margin-bottom:10px;
+        border-radius:15px;
+      }
+
+      .taskHeader {
+        grid-template-columns:1fr auto;
+        gap:12px;
+        margin-bottom:12px;
+      }
+
+      .taskBag {
+        font-size:30px;
+      }
+
+      .taskMeal {
+        font-size:21px;
+        text-align:right;
+      }
+
+      .taskMeta {
+        grid-template-columns:repeat(3, minmax(0, 1fr));
+        gap:8px;
+        margin-bottom:10px;
+      }
+
+      .metaBox {
+        padding:10px 12px;
+        border-radius:14px;
+      }
+
+      .metaLabel {
+        font-size:11px;
+      }
+
+      .metaValue {
+        font-size:17px;
+      }
+
+      .taskActions {
+        gap:8px;
+        margin-top:8px;
+      }
+
+      .taskActions.threeActions {
+        grid-template-columns:1fr 1fr 1fr;
+      }
+
+      .taskActions button {
+        font-size:16px;
+        padding:11px 8px;
+        border-radius:12px;
+      }
+
+      .emptyState {
+        font-size:18px;
+        padding:28px 12px;
+      }
+
+      .queueItem,
+      .historyItem,
+      .memberItem,
+      .nextItem {
+        padding:11px 12px;
+        border-radius:14px;
+      }
+
+      .queueItem,
+      .historyItem {
+        grid-template-columns:1fr auto;
+      }
+
+      .bagCode {
+        font-size:20px;
+      }
+
+      .progressPill {
+        padding:6px 10px;
+        font-size:15px;
+      }
+
+      .mealGrid {
+        grid-template-columns:1fr 1fr;
+        gap:8px;
+      }
+
+      .mealOption {
+        padding:10px;
+        border-radius:12px;
+      }
+
+      .memberActions button,
+      .queueActions button,
+      .historyHeaderRow button {
+        width:auto;
+        font-size:14px;
+        padding:8px 10px;
+      }
+
+      table {
+        font-size:14px;
+      }
+
+      th,
+      td {
+        padding:8px;
+      }
+
+      .modal {
+        padding:20px;
+        border-radius:20px;
+        max-height:88vh;
+      }
+
+      .modalHeader h2 {
+        font-size:24px;
+      }
+
+      .confirmModal h2 {
+        font-size:24px;
+      }
+
+      .confirmText,
+      .confirmDetails {
+        font-size:17px;
+      }
+
+      .modalBtn {
+        font-size:18px;
+        padding:12px;
+      }
+    }
+
+    @media (min-width:701px) and (max-width:900px) {
+      .leaderScanLayout,
+      .leaderMembersLayout,
+      .workerLayout {
+        grid-template-columns:1fr;
+      }
+
+      .workerLayout {
+        display:flex;
+        flex-direction:column;
+      }
+
+      .leaderControlGrid {
+        grid-template-columns:1fr 1fr;
+      }
+
+      .taskActions.threeActions {
+        grid-template-columns:1fr;
+      }
+
+      .taskMeal {
+        text-align:left;
+      }
+
+      .taskHeader {
+        grid-template-columns:1fr;
+      }
     }
   </style>
 </head>
@@ -987,7 +1316,6 @@
       <div class="leaderScanLayout">
         <div class="card">
           <h2>📦 Skanuj torby do kolejki</h2>
-          <p class="muted">Na stanowisku może być maksymalnie 10 aktywnych toreb. Torby ze statusem BRAKI otwierają się automatycznie do dopakowania.</p>
 
           <input id="leaderBagInput" class="scanInput" placeholder="Zeskanuj torbę" autocomplete="off">
           <p id="leaderStatus" class="statusBox muted"></p>
@@ -1001,7 +1329,6 @@
         <div>
           <div class="card">
             <h2>📋 Aktywna kolejka stanowiska</h2>
-            <p class="muted">Widoczne są tylko torby w kolejce i w trakcie pakowania.</p>
             <div id="leaderQueue" class="queueList"></div>
           </div>
 
@@ -1009,7 +1336,6 @@
             <div class="historyHeaderRow">
               <div>
                 <h2>🕘 Historia stanowiska</h2>
-                <p class="muted" style="margin-bottom:0;">Ostatnie zakończone, zastąpione, anulowane torby oraz BRAKI.</p>
               </div>
               <button class="lightBtn" onclick="loadLineHistory()">Odśwież historię</button>
             </div>
@@ -1023,7 +1349,6 @@
       <div class="leaderMembersLayout">
         <div class="card">
           <h2>👥 Pracownicy na stanowisku</h2>
-          <p class="muted">Pracownicy sami dołączają do stanowiska. Lider przypisuje im posiłki tutaj.</p>
           <div id="membersList" class="memberList"></div>
         </div>
 
@@ -1057,7 +1382,6 @@
 
       <div class="card">
         <h2>⏭️ Kolejne zadania</h2>
-        <p class="muted">Lista pokazuje kolejne torby z Twoich aktualnych posiłków. Po ponownym otwarciu torby BRAKI powinny zostać tylko brakujące pozycje.</p>
         <div id="nextTasks" class="nextList"></div>
       </div>
     </div>
@@ -1981,7 +2305,7 @@ async function loadQueue() {
           <div class="bagCode">${escapeHtml(row.bag_qr)}</div>
           <div class="muted">
             Status: <b>${escapeHtml(statusText)}</b> |
-            Pozycja: ${escapeHtml(row.queue_position)}
+            Torba: ${escapeHtml(row.queue_position)}
           </div>
         </div>
 
@@ -2438,7 +2762,7 @@ function renderWorkerTask(errorMessage = "") {
       <div>
         <div class="metaLabel">Aktualna torba</div>
         <div class="taskBag">${escapeHtml(currentTask.bag_qr)}</div>
-        <div class="muted">Pozycja w kolejce: ${escapeHtml(currentTask.queue_position)}</div>
+        <div class="muted">Torba w kolejce: ${escapeHtml(currentTask.queue_position)}</div>
       </div>
       <div class="taskMeal">${escapeHtml(currentTask.meal)}</div>
     </div>
@@ -2454,14 +2778,9 @@ function renderWorkerTask(errorMessage = "") {
       <div class="metaValue">${escapeHtml(currentTask.dish_name || "-")}</div>
     </div>
 
-    <div class="brakiBanner">
-      Jeżeli tej tacki fizycznie brakuje, kliknij <b>BRAKI / do dopakowania</b>.
-      Torba wróci później do dopakowania i nie trzeba będzie skanować wszystkiego od nowa.
-    </div>
-
     <input id="trayScanInput" class="scanInput" placeholder="Zeskanuj tackę" ${currentBadScan ? "disabled" : ""} autocomplete="off">
 
-    ${errorMessage ? `<p class="statusBox bad">${escapeHtml(errorMessage)}</p>` : `<p class="statusBox muted">Zeskanuj tackę dla tej konkretnej pozycji planu.</p>`}
+    ${errorMessage ? `<p class="statusBox bad">${escapeHtml(errorMessage)}</p>` : ""}
     ${badScanHtml}
 
     <div class="taskActions threeActions">
@@ -2495,7 +2814,7 @@ function renderNextTasks() {
     <div class="nextItem">
       <b>${escapeHtml(task.bag_qr)}</b><br>
       <span class="muted">
-        Pozycja ${escapeHtml(task.queue_position)} |
+        Torba ${escapeHtml(task.queue_position)} |
         ${escapeHtml(task.meal)} |
         ${escapeHtml(task.code || "-")} |
         ${escapeHtml(task.size || "-")}
