@@ -2783,9 +2783,8 @@ function renderWorkerTask(errorMessage = "") {
     ${errorMessage ? `<p class="statusBox bad">${escapeHtml(errorMessage)}</p>` : ""}
     ${badScanHtml}
 
-    <div class="taskActions threeActions">
+    <div class="taskActions">
       <button id="brakTaskBtn" class="warning" onclick="markCurrentTaskBrak()" ${currentBadScan ? "disabled" : ""}>🟡 BRAKI / do dopakowania</button>
-      <button id="badTaskBtn" class="danger" onclick="forceBadCurrentTask()">❌ Zapakuj jako niepoprawną</button>
       <button class="lightBtn" onclick="loadTasks()">Odśwież</button>
     </div>
   `;
@@ -2801,7 +2800,6 @@ function renderWorkerTask(errorMessage = "") {
 
   renderNextTasks();
 }
-
 function renderNextTasks() {
   const next = taskList.slice(1, 8);
 
@@ -2946,23 +2944,6 @@ async function markCurrentTaskBrak() {
 
 async function forceBadCurrentTask() {
   if (!currentTask || isBusy) return;
-
-  const choice = await showChoiceModal({
-    title: "❌ Zapakować jako niepoprawną?",
-    text: "Ta pozycja zostanie oznaczona jako niepoprawna, a torba pójdzie dalej do kolejnych pracowników. Po zamknięciu torba trafi do raportu jako niepoprawna.",
-    details: `
-      Torba: <b>${escapeHtml(currentTask.bag_qr)}</b><br>
-      Posiłek: <b>${escapeHtml(currentTask.meal)}</b><br>
-      Oczekiwana tacka: <b>${escapeHtml(currentTask.tray_qr || "-")}</b>
-      ${currentBadScan ? `<br>Zeskanowana błędna tacka: <b>${escapeHtml(currentBadScan.scannedValue)}</b>` : ""}
-    `,
-    buttons: [
-      { label: "Anuluj i wróć do skanowania", value: "cancel", className: "btnCancel" },
-      { label: "Zostaw i zapakuj jako niepoprawną", value: "force", className: "btnReplace" }
-    ]
-  });
-
-  if (choice !== "force") return;
 
   isBusy = true;
 
