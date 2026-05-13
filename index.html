@@ -4,11 +4,12 @@
   <link rel="icon" type="image/png" sizes="32x32" href="logo-removebg-preview.png">
   <link rel="icon" type="image/png" sizes="16x16" href="logo-removebg-preview.png">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Raport pakowania</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Pakowanie stanowiskowe</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
@@ -18,7 +19,7 @@
     <img src="logo.png" alt="logo">
   </div>
 
-  <h1>Raport pakowania</h1>
+  <h1>Pakowanie stanowiskowe</h1>
   <p class="loginSubtitle">Zeskanuj kod QR albo zaloguj się loginem i hasłem</p>
 
   <div class="qrLoginBox">
@@ -34,396 +35,209 @@
   <div id="passwordLoginBox" class="passwordLoginBox hidden">
     <div class="loginDivider">awaryjnie</div>
 
-    <label>Login</label>
-    <input id="loginInput" class="loginInput" placeholder="np. JanKowalski" autocomplete="username">
+    <label>Login pracownika</label>
+    <input id="email" class="loginInput" placeholder="np. JanKowalski" autocomplete="username">
 
     <label>Hasło</label>
-    <input id="passwordInput" class="loginInput" type="password" placeholder="Wpisz hasło" autocomplete="current-password">
+    <input id="password" class="loginInput" type="password" placeholder="Wpisz hasło" autocomplete="current-password">
 
-    <button id="loginButton" type="button" class="loginBtn" onclick="login()">Zaloguj loginem i hasłem</button>
+    <button id="loginBtn" type="button" class="loginBtn" onclick="login()">Zaloguj loginem i hasłem</button>
   </div>
 
   <p id="loginStatus" class="loginStatus"></p>
 </div>
 
-<div id="reportScreen" class="hidden appShell">
-
-  <aside class="sidebar">
-    <div class="brand">
-      <img src="logo.png" alt="logo">
+<div class="shell hidden" id="appScreen">
+  <div class="topbar">
+    <div class="topbarTitle">
+      <img src="logo.png" class="topbarLogo" alt="logo">
       <div>
-        <div class="brandTitle">Catering</div>
-        <div class="brandSub">System</div>
+        <h1 id="mainTitle">Pakowanie stanowiskowe</h1>
+        <div class="muted">
+          Użytkownik: <b id="currentUserLabel">-</b> |
+          Stanowisko: <b id="currentLineLabel">brak</b>
+        </div>
       </div>
     </div>
 
-    <div class="nav">
-      <button id="tabSummary" class="navBtn active" onclick="showReportTab('summary')">📊 Podsumowanie</button>
-      <button id="tabHistory" class="navBtn" onclick="showReportTab('history')">🕘 Historia</button>
-      <button id="tabStations" class="navBtn" onclick="showReportTab('stations')">🧑‍🍳 Stanowiska</button>
-      <button id="tabWorkers" class="navBtn" onclick="showReportTab('workers')">👥 Pracownicy</button>
-      <button id="tabSettings" class="navBtn" onclick="showReportTab('settings')">⚙️ Ustawienia</button>
+    <div class="topbarActions">
+      <button class="lightBtn" onclick="goToModeScreen()">Zmień tryb</button>
+      <button class="danger" onclick="logout()">Wyloguj</button>
     </div>
+  </div>
 
-    <div class="sidebarFooter">
-      <div class="avatar" id="userAvatar">M</div>
-      <div>
-        <div style="font-weight:950;" id="sidebarUserName">Manager</div>
-        <div class="small" id="sidebarRoleName">Rola: -</div>
-      </div>
-    </div>
-  </aside>
+  <div id="modeScreen" class="card">
+    <h2>Wybierz tryb pracy</h2>
+    <p class="muted">Pracownik najpierw dołącza do stanowiska. Lider widzi obecnych ludzi i dopiero wtedy rozdaje im posiłki.</p>
 
-  <main class="main">
-    <div class="hero">
-      <div>
-        <h1 id="reportTitle">Raport pakowania</h1>
-        <div class="heroMeta">
-          Monitoruj jakość pakowania, braki, błędy i efektywność zespołu.<br>
-          Ostatnie odświeżenie: <b id="lastRefresh">-</b> |
-          Auto odświeżanie: <b id="autoRefreshLabel">co 30 sekund</b> |
-          Załadowano wpisów: <b id="loadedRows">0</b>
-        </div>
+    <div class="modeGrid">
+      <div class="modeCard" onclick="showLeaderSetup()">
+        <h2>👑 Lider</h2>
+        <p class="muted">Tworzysz stanowisko, skanujesz torby i zarządzasz przydziałem posiłków.</p>
       </div>
 
-      <div class="heroActions">
-        <button id="refreshButton" class="ghostBtn" onclick="loadReport()">↻ Odśwież</button>
-        <button id="exportButton" class="secondaryBtn" onclick="exportExcel()">Eksport Excel</button>
-        <button class="dangerBtn" onclick="logout()">Wyloguj</button>
+      <div class="modeCard" onclick="showWorkerSetup()">
+        <h2>👷 Pracownik</h2>
+        <p class="muted">Dołączasz do stanowiska i czekasz na przydział od lidera.</p>
       </div>
     </div>
+  </div>
 
-    <section id="summaryView" class="view active">
-      <div class="kpiGrid">
-        <div class="kpiCard">
-          <div class="kpiTop">
-            <div class="kpiLabel">Finalnie zapakowane</div>
-            <div class="kpiIcon logoKpiIcon">
-              <img src="logo.png" alt="logo">
-            </div>
-          </div>
-          <div class="kpiValue" id="totalToday">0 / 0</div>
-          <div class="kpiHint">Bez statusu BRAKI</div>
-        </div>
+  <div id="leaderSetupScreen" class="card hidden">
+    <h2>👑 Utwórz stanowisko</h2>
+    <p class="muted">Wpisz nazwę stanowiska, np. STANOWISKO 1, LINIA A, STÓŁ 2.</p>
 
-        <div class="kpiCard">
-          <div class="kpiTop">
-            <div class="kpiLabel">Poprawne</div>
-            <div class="kpiIcon okIcon">✓</div>
-          </div>
-          <div class="kpiValue ok" id="correctToday">0</div>
-          <div class="kpiHint">Torby zamknięte OK</div>
-        </div>
+    <div class="grid2">
+      <input id="newLineName" placeholder="Nazwa stanowiska">
+      <button onclick="createLine()">Utwórz stanowisko</button>
+    </div>
 
-        <div class="kpiCard">
-          <div class="kpiTop">
-            <div class="kpiLabel">Niepoprawne</div>
-            <div class="kpiIcon badIcon">!</div>
-          </div>
-          <div class="kpiValue bad" id="badToday">0</div>
-          <div class="kpiHint">Wymaga kontroli</div>
-        </div>
+    <p id="leaderSetupStatus" class="statusBox muted"></p>
+  </div>
 
-        <div class="kpiCard">
-          <div class="kpiTop">
-            <div class="kpiLabel">Braki</div>
-            <div class="kpiIcon warnIcon">●</div>
-          </div>
-          <div class="kpiValue warn" id="brakiToday">0</div>
-          <div class="kpiHint">Do dopakowania</div>
-        </div>
+  <div id="workerSetupScreen" class="card hidden">
+    <h2>👷 Dołącz do stanowiska</h2>
+    <p class="muted">Wybierz stanowisko. Nie wybierasz posiłków — zrobi to lider.</p>
 
-        <div class="kpiCard">
-          <div class="kpiTop">
-            <div class="kpiLabel">Poprawność finalnych</div>
-            <div class="kpiIcon okIcon">◎</div>
-          </div>
-          <div class="kpiValue" id="accuracyToday">0%</div>
-          <div class="kpiHint">Poprawne / finalne</div>
-        </div>
+    <div class="grid2">
+      <div class="formGroup">
+        <label>Stanowisko</label>
+        <select id="lineSelect"></select>
+      </div>
+      <div class="formGroup">
+        <label>Odśwież listę</label>
+        <button class="lightBtn" onclick="loadLines()">Odśwież stanowiska</button>
+      </div>
+    </div>
 
-        <div class="kpiCard">
-          <div class="kpiTop">
-            <div class="kpiLabel">Śr. czas / torba</div>
-            <div class="kpiIcon">◷</div>
-          </div>
-          <div class="kpiValue" id="avgTime">0s</div>
-          <div class="kpiHint">Średni czas pakowania</div>
-        </div>
+    <button onclick="joinAsWorker()">Dołącz jako pracownik</button>
+    <p id="workerSetupStatus" class="statusBox muted"></p>
+  </div>
+
+  <div id="leaderScreen" class="hidden">
+    <div class="leaderControlGrid">
+      <div class="leaderControlCard">
+        <div class="controlLabel">Status live</div>
+        <div class="controlValue"><span class="liveDot"></span>Online</div>
       </div>
 
-      <div>
-        <div class="progressHero">
-          <div class="progressMain">
-            <div class="progressInfo">
-              <div class="label">Postęp dnia</div>
-              <div class="progressBig" id="summaryProgressText">0%</div>
-              <div class="small" id="summaryProgressSub">Spakowano 0 z 0 toreb.</div>
-            </div>
-            <div class="pill bluePill">● Live</div>
-          </div>
-          <div class="progressBar">
-            <div class="progressFill" id="totalProgressFill"></div>
-          </div>
-        </div>
-
-        <div class="forecastGrid">
-          <div class="forecastCard">
-            <div class="label">Pozostało do spakowania</div>
-            <div class="forecastValue" id="summaryRemainingBags">0</div>
-            <div class="small">Na podstawie planu dnia.</div>
-          </div>
-
-          <div class="forecastCard">
-            <div class="label">Tempo ostatniej godziny</div>
-            <div class="forecastValue" id="summaryHourlyPace">0 / h</div>
-            <div class="small">Finalnie zamknięte torby.</div>
-          </div>
-
-          <div class="forecastCard">
-            <div class="label">Szacowany czas do końca</div>
-            <div class="forecastValue" id="summaryEta">-</div>
-            <div class="small">Według tempa ostatniej godziny.</div>
-          </div>
-
-          <div class="forecastCard">
-            <div class="label">Jakość / ryzyko</div>
-            <div class="forecastValue" id="summaryQualityRisk">0</div>
-            <div class="small">Niepoprawne + braki.</div>
-          </div>
-        </div>
-
-        <div class="miniGrid">
-          <div class="card">
-            <div class="cardTitleRow">
-              <h2>🕘 Ostatnie torby</h2>
-              <button class="lightBtn" onclick="showReportTab('history')">Historia</button>
-            </div>
-            <div id="summaryRecentHistory" class="small">Brak danych.</div>
-          </div>
-
-          <div class="card">
-            <div class="cardTitleRow">
-              <h2>🏆 Ranking pracowników</h2>
-              <button class="lightBtn" onclick="showReportTab('workers')">Pełny ranking</button>
-            </div>
-            <div id="summaryTopWorkers" class="small">Brak danych.</div>
-          </div>
-        </div>
+      <div class="leaderControlCard">
+        <div class="controlLabel">Torby w kolejce</div>
+        <div class="controlValue" id="leaderActiveBagsCount">0</div>
       </div>
-    </section>
 
-    <section id="historyView" class="view">
-      <div class="card">
-        <div class="cardTitleRow">
-          <div>
-            <h2>🧾 Historia pakowania</h2>
-            <div class="small">Szukaj po torbie, statusie albo pracowniku. Kliknij QR torby, żeby zobaczyć szczegóły.</div>
-          </div>
-        </div>
-
-        <div class="filtersCard">
-          <div class="filterGroup">
-            <label>QR torby</label>
-            <input id="bagSearch" placeholder="Szukaj QR torby..." oninput="resetHistoryPageAndRender()">
-          </div>
-
-          <div class="filterGroup">
-            <label>Status</label>
-            <select id="statusFilter" onchange="resetHistoryPageAndRender()">
-              <option value="">Wszystkie statusy</option>
-              <option value="POPRAWNA">Tylko poprawne</option>
-              <option value="NIEPOPRAWNA">Tylko niepoprawne</option>
-              <option value="BRAKI">Tylko braki</option>
-            </select>
-          </div>
-
-          <div class="filterGroup">
-            <label>Pracownik</label>
-            <select id="workerFilter" onchange="resetHistoryPageAndRender()">
-              <option value="">Wszyscy pracownicy</option>
-            </select>
-          </div>
-
-          <button class="lightBtn" onclick="clearHistoryFilters()">Wyczyść</button>
-          <button class="secondaryBtn" onclick="exportExcel()">Eksport</button>
-        </div>
-
-        <div id="historyTable"></div>
+      <div class="leaderControlCard">
+        <div class="controlLabel">Pracownicy</div>
+        <div class="controlValue" id="leaderMembersCount">0</div>
       </div>
-    </section>
 
-    <section id="stationsView" class="view">
-      <div class="card">
-        <div class="cardTitleRow">
-          <div>
-            <h2>🧑‍🍳 Stanowiska</h2>
-            <div class="small">Podgląd aktywnych stanowisk, kolejek, pracowników i postępu.</div>
-          </div>
-          <button class="ghostBtn" onclick="loadStations()">Odśwież stanowiska</button>
-        </div>
-
-        <div id="stationsGrid" class="stationsGrid">
-          <div class="small">Ładuję stanowiska...</div>
-        </div>
+      <div class="leaderControlCard">
+        <div class="controlLabel">Błędne / braki</div>
+        <div class="controlValue bad" id="leaderBadBagsCount">0</div>
       </div>
-    </section>
+    </div>
 
-    <section id="workersView" class="view">
-      <div class="workerAdminLayout">
+    <div class="leaderTabs">
+      <button id="leaderScanTabBtn" class="active" onclick="showLeaderTab('scan')">📦 Skanowanie toreb</button>
+      <button id="leaderMembersTabBtn" onclick="showLeaderTab('members')">👥 Pracownicy i posiłki</button>
+    </div>
+
+    <div id="leaderScanTab">
+      <div class="leaderScanLayout">
+        <div class="card">
+          <h2>📦 Skanuj torby do kolejki</h2>
+
+          <input id="leaderBagInput" class="scanInput" placeholder="Zeskanuj torbę" autocomplete="off">
+          <p id="leaderStatus" class="statusBox muted"></p>
+
+          <div class="grid2">
+            <button class="lightBtn" onclick="refreshLeaderData()">Odśwież</button>
+            <button class="danger" onclick="closeCurrentLine()">Zamknij stanowisko</button>
+          </div>
+        </div>
+
         <div>
           <div class="card">
-            <div class="employeeToolbar">
-              <div>
-                <h2 style="margin:0;">👥 Pracownicy</h2>
-                <div class="small">Lista workerów, ich nazwy wyświetlane oraz status kodu QR.</div>
-              </div>
-              <button class="primaryBtn" onclick="openEmployeePanel()">+ Dodaj pracownika</button>
-            </div>
-
-            <input id="employeeSearch" placeholder="Szukaj po nazwie lub loginie..." oninput="renderEmployeeDirectory()">
-            <div style="height:14px;"></div>
-            <div id="employeeDirectory"></div>
+            <h2>📋 Aktywna kolejka stanowiska</h2>
+            <div id="leaderQueue" class="queueList"></div>
           </div>
 
           <div class="card">
-            <div class="cardTitleRow">
+            <div class="historyHeaderRow">
               <div>
-                <h2>🏆 Ranking z raportu</h2>
-                <div class="small">Kliknij nagłówki, żeby sortować.</div>
+                <h2>🕘 Historia stanowiska</h2>
               </div>
+              <button class="lightBtn" onclick="loadLineHistory()">Odśwież historię</button>
             </div>
-            <div id="workersTable"></div>
-          </div>
-        </div>
-
-        <div id="employeePanel" class="sidePanelMock">
-          <div class="cardTitleRow">
-            <h2>Nowy pracownik</h2>
-            <button class="lightBtn" style="width:auto;" onclick="clearEmployeeForm()">Wyczyść</button>
-          </div>
-
-          <label class="label">Login pracownika</label>
-          <input id="newWorkerLogin" placeholder="np. daria">
-
-          <label class="label">Nazwa wyświetlana</label>
-          <input id="newWorkerDisplayName" placeholder="np. Daria Malczewska">
-
-          <label class="label">Hasło startowe</label>
-          <input id="newWorkerPassword" type="password" placeholder="Wpisz hasło dla pracownika">
-
-          <label class="label">Rola</label>
-          <input value="worker" disabled>
-
-          <button id="createWorkerButton" class="primaryBtn" style="width:100%;" onclick="createWorker()">
-            Zapisz pracownika
-          </button>
-
-          <p id="employeeStatus" class="employeeStatus"></p>
-
-          <div class="small" style="margin-top:14px;">
-            Po zapisaniu pracownik będzie miał rolę <b>worker</b>. Kod QR, jeśli Edge Function go generuje, zostanie ustawiony w tle.
+            <div id="leaderHistory" class="historyList"></div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <section id="settingsView" class="view">
-      <div class="settingsSlimGrid">
+    <div id="leaderMembersTab" class="hidden">
+      <div class="leaderMembersLayout">
         <div class="card">
-          <h2>📊 Raport</h2>
+          <h2>👥 Pracownicy na stanowisku</h2>
+          <div id="membersList" class="memberList"></div>
+        </div>
 
-          <div class="settingRow">
-            <div>
-              <b>Odświeżanie raportu</b>
-              <div class="small">Jak często raport ma pobierać nowe dane.</div>
-            </div>
-            <select id="reportRefreshSelect" style="width:150px;" onchange="updateRefreshInterval()">
-              <option value="30">30 sek.</option>
-              <option value="60">60 sek.</option>
-              <option value="120">120 sek.</option>
-            </select>
+        <div class="card">
+          <h2 id="assignmentTitle">Przydział posiłków</h2>
+          <p class="muted" id="assignmentHint">Wybierz pracownika z listy po lewej.</p>
+
+          <input id="assignWorkerEmail" type="hidden">
+
+          <div class="formGroup">
+            <label>Posiłki dla pracownika</label>
+            <div id="leaderMealsBox" class="mealGrid"></div>
           </div>
 
-          <div class="settingRow">
-            <div>
-              <b>Historia na stronę</b>
-              <div class="small">Liczba wpisów pokazywana jednocześnie w Historii.</div>
-            </div>
-            <select id="historyPageSizeSelect" style="width:150px;" onchange="updateHistoryPageSize()">
-              <option value="50">50</option>
-              <option value="100">100</option>
-              <option value="250">250</option>
-              <option value="500">500</option>
-              <option value="1000" selected>1000</option>
-              <option value="2000">2000</option>
-            </select>
-          </div>
+          <button onclick="saveSelectedMemberMeals()">💾 Zapisz przydział</button>
+          <button class="danger" style="margin-top:10px;" onclick="clearSelectedMemberMeals()">Usuń przydział</button>
+          <p id="assignmentStatus" class="statusBox muted"></p>
         </div>
       </div>
-    </section>
-  </main>
+    </div>
+  </div>
+
+  <div id="workerScreen" class="hidden">
+    <div class="workerLayout">
+      <div>
+        <div id="workerAssignmentBox" class="assignmentBanner">Czekam na przydział od lidera...</div>
+        <div id="currentTaskBox" class="taskCard">
+          <div class="emptyState">Brak zadania. Czekam na torby w kolejce...</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>⏭️ Kolejne zadania</h2>
+        <div id="nextTasks" class="nextList"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div id="detailsModal" class="modalBg hidden">
+<div id="bagDetailsModal" class="modalBg hidden">
   <div class="modal">
     <div class="modalHeader">
-      <h2 id="detailsModalTitle">📦 Szczegóły</h2>
-      <button class="closeBtn" onclick="closeDetails()">Zamknij</button>
+      <h2 id="bagDetailsTitle">Szczegóły torby</h2>
+      <button class="danger" style="width:auto;" onclick="closeBagDetails()">Zamknij</button>
     </div>
-    <div id="detailsContent"></div>
+    <div id="bagDetailsContent"></div>
   </div>
 </div>
 
-<div class="mobileView hidden" id="mobileScreen">
-  <div id="mobileAlertBox" class="mobileAlertBox hidden"></div>
-  <div id="mobileBrakiBox" class="mobileBrakiBox hidden"></div>
-
-  <div class="mobileTopbar">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <img src="logo.png" class="mobileLogo" alt="logo">
-      <div>
-        <h1 id="mobileTitleEl">Raport pakowania</h1>
-        <div class="small">Odświeżono: <span id="mobileLastRefresh">-</span></div>
-      </div>
-    </div>
-    <div class="mobileTopbarRight">
-      <button onclick="loadReport()" style="background:#111827;">↻</button>
-      <button onclick="logout()" style="background:#ef4444;">Wyloguj</button>
-    </div>
-  </div>
-
-  <div class="mobileStatsGrid">
-    <div class="mobileStatCard fullWidth">
-      <div class="mobileStatLabel">Postęp pakowania</div>
-      <div class="mobileStatValue" id="mobileTotalStat">0 / 0</div>
-      <div class="mobileProgressBar">
-        <div class="mobileProgressFill" id="mobileProgressFill"></div>
-      </div>
-    </div>
-    <div class="mobileStatCard">
-      <div class="mobileStatLabel">Poprawne</div>
-      <div class="mobileStatValue ok" id="mobileCorrectStat">0</div>
-    </div>
-    <div class="mobileStatCard">
-      <div class="mobileStatLabel">Niepoprawne</div>
-      <div class="mobileStatValue bad" id="mobileBadStat">0</div>
-    </div>
-    <div class="mobileStatCard">
-      <div class="mobileStatLabel">Braki</div>
-      <div class="mobileStatValue warn" id="mobileBrakiStat">0</div>
-    </div>
-    <div class="mobileStatCard">
-      <div class="mobileStatLabel">Poprawność</div>
-      <div class="mobileStatValue" id="mobileAccuracyStat">0%</div>
-    </div>
-  </div>
-
-  <div class="mobileHistoryCard">
-    <h2>🧾 Ostatnie torby</h2>
-    <div id="mobileHistoryList"></div>
+<div id="confirmModal" class="modalBg hidden">
+  <div class="modal confirmModal">
+    <h2 id="confirmTitle">Potwierdź akcję</h2>
+    <p id="confirmText" class="confirmText"></p>
+    <div id="confirmDetails" class="confirmDetails hidden"></div>
+    <div id="confirmButtons"></div>
   </div>
 </div>
+
 <script src="app.js"></script>
+
 </body>
 </html>
