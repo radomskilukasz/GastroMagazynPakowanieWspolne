@@ -4,1182 +4,11 @@
   <link rel="icon" type="image/png" sizes="32x32" href="logo-removebg-preview.png">
   <link rel="icon" type="image/png" sizes="16x16" href="logo-removebg-preview.png">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Pakowanie stanowiskowe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raport pakowania</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    :root {
-      --bg:#eef2f7;
-      --card:#ffffff;
-      --text:#111827;
-      --muted:#6b7280;
-      --border:#e5e7eb;
-      --blue:#2563eb;
-      --blue-dark:#1d4ed8;
-      --green:#16a34a;
-      --red:#dc2626;
-      --orange:#f59e0b;
-      --black:#111827;
-      --shadow:0 10px 35px rgba(15,23,42,.08);
-    }
-
-    * { box-sizing:border-box; }
-
-    body {
-      font-family:Arial, sans-serif;
-      background:var(--bg);
-      margin:0;
-      padding:22px;
-      color:var(--text);
-      -webkit-text-size-adjust:100%;
-    }
-
-    .hidden { display:none !important; }
-    h1, h2, h3, p { margin-top:0; }
-    button, input, select { font-family:inherit; }
-
-    input, select {
-      width:100%;
-      font-size:20px;
-      padding:15px;
-      border-radius:14px;
-      border:2px solid #d1d5db;
-      background:white;
-      min-height:54px;
-    }
-
-    input:focus, select:focus {
-      outline:none;
-      border-color:var(--blue);
-      box-shadow:0 0 0 4px rgba(37,99,235,.15);
-    }
-
-    button {
-      width:100%;
-      font-size:20px;
-      padding:16px;
-      border:none;
-      border-radius:14px;
-      cursor:pointer;
-      font-weight:bold;
-      background:var(--blue);
-      color:white;
-      transition:.15s ease;
-      touch-action:manipulation;
-    }
-
-    button:hover { background:var(--blue-dark); }
-    button:disabled { opacity:.6; cursor:not-allowed; }
-
-    .danger { background:var(--red); }
-    .danger:hover { background:#b91c1c; }
-    .warning { background:var(--orange); }
-    .warning:hover { background:#d97706; }
-    .darkBtn { background:var(--black); }
-    .darkBtn:hover { background:#030712; }
-    .lightBtn { background:#e5e7eb; color:#111827; }
-    .lightBtn:hover { background:#d1d5db; }
-    .successBtn { background:var(--green); }
-    .successBtn:hover { background:#15803d; }
-
-    .ok { color:var(--green); font-weight:bold; }
-    .bad { color:var(--red); font-weight:bold; }
-    .warn { color:var(--orange); font-weight:bold; }
-    .muted { color:var(--muted); }
-
-    .shell { width:100%; max-width:1700px; margin:0 auto; }
-
-    .card {
-      background:white;
-      border-radius:24px;
-      padding:26px;
-      box-shadow:var(--shadow);
-      border:1px solid rgba(255,255,255,.7);
-      margin-bottom:18px;
-    }
-
-    .loginCard {
-      background:white;
-      padding:36px;
-      border-radius:24px;
-      width:100%;
-      max-width:520px;
-      margin:40px auto;
-      box-shadow:var(--shadow);
-      box-sizing:border-box;
-    }
-
-    .logoBox,
-    .loginLogo {
-      text-align:center;
-      margin-bottom:15px;
-    }
-
-    .logoBox img,
-    .loginLogo img {
-      width:90px;
-      height:auto;
-      display:block;
-      margin:0 auto;
-    }
-
-    .loginCard h1 {
-      text-align:center;
-      margin:0;
-      font-size:32px;
-    }
-
-    .subtitle,
-    .loginSubtitle {
-      text-align:center;
-      color:var(--muted);
-      margin-top:8px;
-      margin-bottom:28px;
-      line-height:1.4;
-    }
-
-    .loginCard label {
-      display:block;
-      font-weight:bold;
-      margin-top:16px;
-      margin-bottom:6px;
-    }
-
-    .qrLoginBox {
-      background:#eff6ff;
-      border:2px solid #bfdbfe;
-      border-radius:18px;
-      padding:18px;
-      margin-bottom:22px;
-    }
-
-    .qrLoginBox label {
-      margin-top:0;
-      color:#1e3a8a;
-      font-size:18px;
-    }
-
-    .qrLoginInput {
-      width:100%;
-      font-size:24px;
-      padding:16px;
-      border-radius:14px;
-      border:3px solid var(--blue);
-      margin:0;
-      text-align:center;
-      font-weight:bold;
-      letter-spacing:.5px;
-    }
-
-    .qrLoginInput:focus {
-      outline:none;
-      border-color:var(--blue-dark);
-      box-shadow:0 0 0 4px rgba(37,99,235,.15);
-    }
-
-    .qrLoginBtn {
-      width:100%;
-      margin:14px 0 0;
-      font-size:22px;
-      padding:15px;
-      border-radius:14px;
-      border:none;
-      background:var(--blue);
-      color:white;
-      font-weight:bold;
-    }
-
-    .togglePasswordBtn {
-      width:100%;
-      margin:8px 0 0;
-      font-size:18px;
-      padding:13px;
-      border-radius:14px;
-      border:none;
-      background:#e5e7eb;
-      color:#111827;
-      font-weight:bold;
-    }
-
-    .togglePasswordBtn:hover { background:#d1d5db; }
-
-    .passwordLoginBox {
-      margin-top:18px;
-      padding-top:4px;
-    }
-
-    .loginDivider {
-      display:flex;
-      align-items:center;
-      gap:12px;
-      color:var(--muted);
-      font-weight:bold;
-      margin:18px 0;
-      text-align:center;
-    }
-
-    .loginDivider::before,
-    .loginDivider::after {
-      content:"";
-      height:1px;
-      background:#d1d5db;
-      flex:1;
-    }
-
-    .loginInput {
-      width:100%;
-      font-size:22px;
-      padding:14px;
-      border-radius:12px;
-      border:2px solid #d1d5db;
-      margin:0;
-    }
-
-    .loginInput:focus {
-      outline:none;
-      border-color:var(--blue);
-    }
-
-    .loginBtn {
-      width:100%;
-      margin:24px 0 0;
-      font-size:24px;
-      padding:16px;
-      border-radius:14px;
-      border:none;
-      background:var(--blue);
-      color:white;
-      font-weight:bold;
-    }
-
-    .loginBtn:hover { background:var(--blue-dark); }
-
-    .loginStatus {
-      margin-top:18px;
-      padding:12px;
-      border-radius:12px;
-      font-weight:bold;
-      display:none;
-      line-height:1.35;
-      white-space:pre-wrap;
-    }
-
-    .loginStatus.error { display:block; background:#fee2e2; color:#991b1b; }
-    .loginStatus.ok { display:block; background:#dcfce7; color:#166534; }
-    .loginStatus.info { display:block; background:#eff6ff; color:#1d4ed8; }
-
-    .formGroup { margin-bottom:16px; }
-
-    .formGroup label {
-      display:block;
-      font-weight:bold;
-      margin-bottom:7px;
-      color:#374151;
-    }
-
-    .statusBox {
-      margin-top:16px;
-      padding:13px 15px;
-      border-radius:14px;
-      background:#f9fafb;
-      border:1px solid var(--border);
-      min-height:48px;
-      font-weight:bold;
-      line-height:1.35;
-    }
-
-    .statusBox.ok { background:#dcfce7; border-color:#bbf7d0; color:#166534; }
-    .statusBox.bad { background:#fee2e2; border-color:#fecaca; color:#991b1b; }
-    .statusBox.warn { background:#fffbeb; border-color:#fde68a; color:#92400e; }
-    .statusBox.muted { color:var(--muted); }
-
-    .topbar {
-      background:white;
-      border-radius:26px;
-      padding:22px 26px;
-      margin-bottom:20px;
-      box-shadow:var(--shadow);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:20px;
-      flex-wrap:wrap;
-    }
-
-    .topbarTitle { display:flex; gap:18px; align-items:center; min-width:0; }
-    .topbarLogo { width:70px; height:auto; flex:0 0 auto; }
-    .topbar h1 { margin:0; font-size:36px; letter-spacing:-.03em; }
-
-    .topbarActions { display:flex; gap:10px; flex-wrap:wrap; }
-    .topbarActions button { width:auto; min-width:160px; }
-
-    .modeGrid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-
-    .modeCard {
-      border:2px solid var(--border);
-      border-radius:22px;
-      padding:28px;
-      cursor:pointer;
-      background:#f9fafb;
-      transition:.15s ease;
-    }
-
-    .modeCard:hover {
-      border-color:var(--blue);
-      box-shadow:0 0 0 4px rgba(37,99,235,.12);
-    }
-
-    .modeCard h2 { font-size:30px; margin-bottom:8px; }
-
-    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-
-    .leaderTabs {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-bottom:18px;
-    }
-
-    .leaderTabs button { background:#e5e7eb; color:#111827; }
-    .leaderTabs button.active { background:var(--blue); color:white; }
-
-    .leaderScanLayout {
-      display:grid;
-      grid-template-columns:minmax(0, 430px) minmax(0, 1fr);
-      gap:20px;
-      align-items:start;
-    }
-
-    .leaderMembersLayout {
-      display:grid;
-      grid-template-columns:minmax(0, 1fr) minmax(0, 460px);
-      gap:20px;
-      align-items:start;
-    }
-
-    .workerLayout {
-      display:grid;
-      grid-template-columns:minmax(0, 1fr) 420px;
-      gap:20px;
-      align-items:start;
-    }
-
-    .scanInput {
-      font-size:32px;
-      padding:20px;
-      text-align:center;
-      font-weight:bold;
-      letter-spacing:1px;
-      border:3px solid var(--blue);
-    }
-
-    .queueList, .memberList, .historyList {
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .queueItem,
-    .historyItem {
-      border:1px solid var(--border);
-      background:#f9fafb;
-      border-radius:18px;
-      padding:16px;
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:12px;
-      align-items:center;
-      cursor:pointer;
-      transition:.15s ease;
-    }
-
-    .queueItem:hover,
-    .historyItem:hover {
-      border-color:var(--blue);
-      box-shadow:0 0 0 4px rgba(37,99,235,.10);
-    }
-
-    .queueItem.badBag,
-    .historyItem.badBag { border-color:#fecaca; background:#fff1f2; }
-    .queueItem.doneBag,
-    .historyItem.doneBag { border-color:#bbf7d0; background:#f0fdf4; }
-    .queueItem.brakiBag,
-    .historyItem.brakiBag { border-color:#fde68a; background:#fffbeb; }
-    .historyItem.replacedBag,
-    .historyItem.cancelledBag { border-color:#fed7aa; background:#fff7ed; }
-
-    .memberItem {
-      border:1px solid var(--border);
-      background:#f9fafb;
-      border-radius:18px;
-      padding:16px;
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:12px;
-      align-items:center;
-    }
-
-    .memberActions {
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .memberActions button {
-      width:auto;
-      font-size:15px;
-      padding:10px 12px;
-      border-radius:10px;
-    }
-
-    .bagCode {
-      font-size:24px;
-      font-weight:bold;
-      word-break:break-word;
-    }
-
-    .progressPill {
-      display:inline-block;
-      padding:8px 12px;
-      border-radius:999px;
-      background:#e5e7eb;
-      font-weight:bold;
-      white-space:nowrap;
-    }
-
-    .progressPill.warnPill { background:#fef3c7; color:#92400e; }
-
-    .mealGrid {
-      display:grid;
-      grid-template-columns:repeat(3, minmax(0, 1fr));
-      gap:10px;
-    }
-
-    .mealOption {
-      display:flex;
-      align-items:center;
-      gap:10px;
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:12px;
-      background:#f9fafb;
-      font-weight:bold;
-      cursor:pointer;
-    }
-
-    .mealOption input { width:auto; min-height:auto; transform:scale(1.25); }
-
-    .taskCard {
-      border:2px solid var(--border);
-      border-radius:26px;
-      padding:28px;
-      background:white;
-      box-shadow:var(--shadow);
-    }
-
-    .taskCard.errorState {
-      border-color:#ef4444;
-      background:#fff1f2;
-      animation:errorPulse .8s ease-in-out 2;
-    }
-
-    @keyframes errorPulse {
-      0% { box-shadow:0 0 0 0 rgba(239,68,68,.4); }
-      100% { box-shadow:0 0 0 12px rgba(239,68,68,0); }
-    }
-
-    .assignmentBanner {
-      background:#eff6ff;
-      border:2px solid #bfdbfe;
-      color:#1e3a8a;
-      border-radius:20px;
-      padding:16px;
-      margin-bottom:18px;
-      font-weight:bold;
-      font-size:20px;
-      line-height:1.45;
-    }
-
-    .taskHeader {
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:18px;
-      align-items:start;
-      margin-bottom:22px;
-    }
-
-    .taskBag {
-      font-size:42px;
-      font-weight:bold;
-      letter-spacing:-.03em;
-      word-break:break-word;
-    }
-
-    .taskMeal {
-      font-size:26px;
-      font-weight:bold;
-      color:var(--blue);
-      text-align:right;
-    }
-
-    .taskMeta {
-      display:grid;
-      grid-template-columns:repeat(3, 1fr);
-      gap:12px;
-      margin-bottom:18px;
-    }
-
-    .metaBox {
-      background:#f9fafb;
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:15px;
-    }
-
-    .metaLabel {
-      color:var(--muted);
-      font-size:13px;
-      text-transform:uppercase;
-      font-weight:bold;
-      letter-spacing:.04em;
-      margin-bottom:5px;
-    }
-
-    .metaValue {
-      font-size:20px;
-      font-weight:bold;
-      word-break:break-word;
-    }
-
-    .wrongScanBox {
-      background:#fee2e2;
-      border:2px solid #fecaca;
-      color:#991b1b;
-      border-radius:18px;
-      padding:16px;
-      margin-top:14px;
-      font-weight:bold;
-    }
-
-    .wrongScanBox .wrongCode {
-      font-size:28px;
-      margin:8px 0 14px;
-      word-break:break-word;
-    }
-
-    .taskActions {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-top:12px;
-    }
-
-    .taskActions.threeActions { grid-template-columns:1fr 1fr 1fr; }
-
-    .nextList { display:flex; flex-direction:column; gap:10px; }
-
-    .nextItem {
-      border:1px solid var(--border);
-      border-radius:16px;
-      background:#f9fafb;
-      padding:14px;
-    }
-
-    .emptyState {
-      text-align:center;
-      padding:40px 20px;
-      color:var(--muted);
-      font-size:22px;
-      font-weight:bold;
-    }
-
-    .modalBg {
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.55);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:999;
-      padding:14px;
-    }
-
-    .modal {
-      background:white;
-      border-radius:24px;
-      padding:28px;
-      width:95%;
-      max-width:1100px;
-      max-height:85vh;
-      overflow:auto;
-      box-shadow:0 25px 80px rgba(0,0,0,.25);
-    }
-
-    .confirmModal { max-width:650px; text-align:left; }
-    .confirmModal h2 { font-size:30px; margin:0 0 12px; }
-
-    .confirmText {
-      font-size:20px;
-      color:#374151;
-      line-height:1.45;
-      margin-bottom:18px;
-    }
-
-    .confirmDetails {
-      background:#f9fafb;
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:14px 16px;
-      margin-bottom:18px;
-      font-size:18px;
-      line-height:1.45;
-    }
-
-    .modalBtn {
-      width:100%;
-      font-size:22px;
-      padding:15px;
-      margin:8px 0;
-      border-radius:10px;
-    }
-
-    .btnCancel { background:#e5e7eb; color:#111827; }
-    .btnCancel:hover { background:#d1d5db; }
-    .btnReplace { background:#f97316; color:white; border:none; }
-    .btnReplace:hover { background:#ea580c; }
-    .btnAnother { background:#2563eb; color:white; border:none; }
-    .btnAnother:hover { background:#1d4ed8; }
-
-    .modalHeader {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      margin-bottom:18px;
-    }
-
-    .modalHeader h2 { margin:0; font-size:30px; }
-
-    table {
-      width:100%;
-      border-collapse:collapse;
-      font-size:17px;
-    }
-
-    th, td {
-      border-bottom:1px solid var(--border);
-      padding:12px;
-      text-align:left;
-      vertical-align:middle;
-    }
-
-    th {
-      background:#f9fafb;
-      color:#374151;
-      font-size:13px;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-    }
-
-    tr.doneRow { background:#f0fdf4; }
-    tr.badRow { background:#fff1f2; }
-    tr.brakiRow { background:#fffbeb; }
-
-    .leaderControlGrid {
-      display:grid;
-      grid-template-columns:repeat(4, minmax(0, 1fr));
-      gap:14px;
-      margin-bottom:18px;
-    }
-
-    .leaderControlCard {
-      background:white;
-      border:1px solid var(--border);
-      border-radius:20px;
-      padding:18px;
-      box-shadow:var(--shadow);
-    }
-
-    .controlLabel {
-      color:var(--muted);
-      font-size:14px;
-      font-weight:bold;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-      margin-bottom:8px;
-    }
-
-    .controlValue { font-size:30px; font-weight:bold; }
-
-    .liveDot {
-      display:inline-block;
-      width:12px;
-      height:12px;
-      border-radius:999px;
-      background:#22c55e;
-      margin-right:8px;
-    }
-
-    .memberItem.selectedMember {
-      border-color:var(--blue);
-      box-shadow:0 0 0 4px rgba(37,99,235,.12);
-      background:#eff6ff;
-    }
-
-    .queueActions {
-      display:flex;
-      gap:8px;
-      justify-content:flex-end;
-      flex-wrap:wrap;
-    }
-
-    .queueActions button {
-      width:auto;
-      font-size:15px;
-      padding:10px 12px;
-      border-radius:10px;
-    }
-
-    .historyHeaderRow {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:10px;
-    }
-
-    .historyHeaderRow button {
-      width:auto;
-      font-size:15px;
-      padding:10px 12px;
-      border-radius:10px;
-    }
-
-    @media(max-width:900px){
-      .leaderControlGrid { grid-template-columns:1fr 1fr; }
-    }
-
-    @media(max-width:600px){
-      .leaderControlGrid { grid-template-columns:1fr; }
-    }
-
-    @media(max-width:1300px){
-      .leaderScanLayout,
-      .leaderMembersLayout {
-        grid-template-columns:1fr;
-      }
-    }
-
-    @media(max-width:1100px){
-      .workerLayout,
-      .grid2,
-      .modeGrid {
-        grid-template-columns:1fr;
-      }
-
-      .workerLayout {
-        display:flex;
-        flex-direction:column;
-      }
-
-      .mealGrid {
-        grid-template-columns:1fr 1fr;
-      }
-
-      .taskActions.threeActions {
-        grid-template-columns:1fr;
-      }
-    }
-
-    @media(max-width:700px){
-      body { padding:12px; }
-
-      .card,
-      .loginCard,
-      .taskCard {
-        padding:20px;
-      }
-
-      .topbar {
-        padding:18px;
-      }
-
-      .topbarTitle {
-        width:100%;
-      }
-
-      .topbar h1 {
-        font-size:28px;
-      }
-
-      .topbarActions {
-        width:100%;
-      }
-
-      .topbarActions button {
-        width:100%;
-      }
-
-      .taskHeader {
-        grid-template-columns:1fr;
-      }
-
-      .taskMeal {
-        text-align:left;
-      }
-
-      .taskBag {
-        font-size:34px;
-      }
-
-      .taskMeta {
-        grid-template-columns:1fr;
-      }
-
-      .taskActions {
-        grid-template-columns:1fr;
-      }
-
-      .mealGrid {
-        grid-template-columns:1fr;
-      }
-
-      .leaderTabs {
-        grid-template-columns:1fr;
-      }
-
-      .memberItem {
-        grid-template-columns:1fr;
-      }
-
-      .memberActions {
-        justify-content:stretch;
-      }
-
-      .memberActions button {
-        width:100%;
-      }
-    }
-
-    @media (min-width:701px) and (max-width:1194px) {
-      body {
-        padding:10px;
-      }
-
-      .shell {
-        max-width:1180px;
-      }
-
-      .topbar {
-        padding:12px 16px;
-        margin-bottom:12px;
-        border-radius:20px;
-        gap:12px;
-      }
-
-      .topbarLogo {
-        width:52px;
-      }
-
-      .topbar h1 {
-        font-size:27px;
-      }
-
-      .topbarTitle {
-        gap:12px;
-      }
-
-      .topbarActions {
-        gap:8px;
-      }
-
-      .topbarActions button {
-        min-width:132px;
-        font-size:16px;
-        padding:11px 12px;
-        border-radius:12px;
-      }
-
-      .card,
-      .taskCard {
-        padding:16px 18px;
-        border-radius:20px;
-        margin-bottom:12px;
-      }
-
-      .leaderControlGrid {
-        grid-template-columns:repeat(4, minmax(0, 1fr));
-        gap:10px;
-        margin-bottom:12px;
-      }
-
-      .leaderControlCard {
-        padding:12px;
-        border-radius:16px;
-      }
-
-      .controlLabel {
-        font-size:11px;
-        margin-bottom:4px;
-      }
-
-      .controlValue {
-        font-size:22px;
-      }
-
-      .leaderTabs {
-        grid-template-columns:1fr 1fr;
-        gap:8px;
-        margin-bottom:12px;
-      }
-
-      .leaderTabs button {
-        font-size:17px;
-        padding:12px;
-        border-radius:12px;
-      }
-
-      .leaderScanLayout {
-        display:grid;
-        grid-template-columns:360px minmax(0, 1fr);
-        gap:12px;
-      }
-
-      .leaderMembersLayout {
-        display:grid;
-        grid-template-columns:minmax(0, 1fr) 390px;
-        gap:12px;
-      }
-
-      .workerLayout {
-        display:grid;
-        grid-template-columns:minmax(0, 1fr) 330px;
-        gap:12px;
-      }
-
-      .grid2 {
-        grid-template-columns:1fr 1fr;
-        gap:10px;
-      }
-
-      .modeGrid {
-        grid-template-columns:1fr 1fr;
-        gap:12px;
-      }
-
-      .modeCard {
-        padding:20px;
-        border-radius:18px;
-      }
-
-      .modeCard h2 {
-        font-size:24px;
-      }
-
-      h2 {
-        font-size:22px;
-        margin-bottom:8px;
-      }
-
-      p {
-        margin-bottom:10px;
-      }
-
-      input,
-      select {
-        font-size:17px;
-        padding:11px 12px;
-        min-height:48px;
-        border-radius:12px;
-      }
-
-      button {
-        font-size:17px;
-        padding:12px;
-        border-radius:12px;
-      }
-
-      .scanInput {
-        font-size:25px;
-        padding:12px;
-        min-height:52px;
-        border-radius:12px;
-      }
-
-      .statusBox {
-        margin-top:10px;
-        padding:10px 12px;
-        min-height:40px;
-        font-size:15px;
-      }
-
-      .assignmentBanner {
-        font-size:16px;
-        padding:11px 12px;
-        margin-bottom:10px;
-        border-radius:15px;
-      }
-
-      .taskHeader {
-        grid-template-columns:1fr auto;
-        gap:12px;
-        margin-bottom:12px;
-      }
-
-      .taskBag {
-        font-size:30px;
-      }
-
-      .taskMeal {
-        font-size:21px;
-        text-align:right;
-      }
-
-      .taskMeta {
-        grid-template-columns:repeat(3, minmax(0, 1fr));
-        gap:8px;
-        margin-bottom:10px;
-      }
-
-      .metaBox {
-        padding:10px 12px;
-        border-radius:14px;
-      }
-
-      .metaLabel {
-        font-size:11px;
-      }
-
-      .metaValue {
-        font-size:17px;
-      }
-
-      .taskActions {
-        gap:8px;
-        margin-top:8px;
-      }
-
-      .taskActions.threeActions {
-        grid-template-columns:1fr 1fr 1fr;
-      }
-
-      .taskActions button {
-        font-size:16px;
-        padding:11px 8px;
-        border-radius:12px;
-      }
-
-      .emptyState {
-        font-size:18px;
-        padding:28px 12px;
-      }
-
-      .queueItem,
-      .historyItem,
-      .memberItem,
-      .nextItem {
-        padding:11px 12px;
-        border-radius:14px;
-      }
-
-      .queueItem,
-      .historyItem {
-        grid-template-columns:1fr auto;
-      }
-
-      .bagCode {
-        font-size:20px;
-      }
-
-      .progressPill {
-        padding:6px 10px;
-        font-size:15px;
-      }
-
-      .mealGrid {
-        grid-template-columns:1fr 1fr;
-        gap:8px;
-      }
-
-      .mealOption {
-        padding:10px;
-        border-radius:12px;
-      }
-
-      .memberActions button,
-      .queueActions button,
-      .historyHeaderRow button {
-        width:auto;
-        font-size:14px;
-        padding:8px 10px;
-      }
-
-      table {
-        font-size:14px;
-      }
-
-      th,
-      td {
-        padding:8px;
-      }
-
-      .modal {
-        padding:20px;
-        border-radius:20px;
-        max-height:88vh;
-      }
-
-      .modalHeader h2 {
-        font-size:24px;
-      }
-
-      .confirmModal h2 {
-        font-size:24px;
-      }
-
-      .confirmText,
-      .confirmDetails {
-        font-size:17px;
-      }
-
-      .modalBtn {
-        font-size:18px;
-        padding:12px;
-      }
-    }
-
-    @media (min-width:701px) and (max-width:900px) {
-      .leaderScanLayout,
-      .leaderMembersLayout,
-      .workerLayout {
-        grid-template-columns:1fr;
-      }
-
-      .workerLayout {
-        display:flex;
-        flex-direction:column;
-      }
-
-      .leaderControlGrid {
-        grid-template-columns:1fr 1fr;
-      }
-
-      .taskActions.threeActions {
-        grid-template-columns:1fr;
-      }
-
-      .taskMeal {
-        text-align:left;
-      }
-
-      .taskHeader {
-        grid-template-columns:1fr;
-      }
-    }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -1189,7 +18,7 @@
     <img src="logo.png" alt="logo">
   </div>
 
-  <h1>Pakowanie stanowiskowe</h1>
+  <h1>Raport pakowania</h1>
   <p class="loginSubtitle">Zeskanuj kod QR albo zaloguj się loginem i hasłem</p>
 
   <div class="qrLoginBox">
@@ -1205,1942 +34,396 @@
   <div id="passwordLoginBox" class="passwordLoginBox hidden">
     <div class="loginDivider">awaryjnie</div>
 
-    <label>Login pracownika</label>
-    <input id="email" class="loginInput" placeholder="np. JanKowalski" autocomplete="username">
+    <label>Login</label>
+    <input id="loginInput" class="loginInput" placeholder="np. JanKowalski" autocomplete="username">
 
     <label>Hasło</label>
-    <input id="password" class="loginInput" type="password" placeholder="Wpisz hasło" autocomplete="current-password">
+    <input id="passwordInput" class="loginInput" type="password" placeholder="Wpisz hasło" autocomplete="current-password">
 
-    <button id="loginBtn" type="button" class="loginBtn" onclick="login()">Zaloguj loginem i hasłem</button>
+    <button id="loginButton" type="button" class="loginBtn" onclick="login()">Zaloguj loginem i hasłem</button>
   </div>
 
   <p id="loginStatus" class="loginStatus"></p>
 </div>
 
-<div class="shell hidden" id="appScreen">
-  <div class="topbar">
-    <div class="topbarTitle">
-      <img src="logo.png" class="topbarLogo" alt="logo">
+<div id="reportScreen" class="hidden appShell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="logo.png" alt="logo">
       <div>
-        <h1 id="mainTitle">Pakowanie stanowiskowe</h1>
-        <div class="muted">
-          Użytkownik: <b id="currentUserLabel">-</b> |
-          Stanowisko: <b id="currentLineLabel">brak</b>
+        <div class="brandTitle">Catering</div>
+        <div class="brandSub">System</div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button id="tabSummary" class="navBtn active" onclick="showReportTab('summary')">📊 Podsumowanie</button>
+      <button id="tabHistory" class="navBtn" onclick="showReportTab('history')">🕘 Historia</button>
+      <button id="tabStations" class="navBtn" onclick="showReportTab('stations')">🧑‍🍳 Stanowiska</button>
+      <button id="tabWorkers" class="navBtn" onclick="showReportTab('workers')">👥 Pracownicy</button>
+      <button id="tabSettings" class="navBtn" onclick="showReportTab('settings')">⚙️ Ustawienia</button>
+    </div>
+
+    <div class="sidebarFooter">
+      <div class="avatar" id="userAvatar">M</div>
+      <div>
+        <div style="font-weight:950;" id="sidebarUserName">Manager</div>
+        <div class="small" id="sidebarRoleName">Rola: -</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="hero">
+      <div>
+        <h1 id="reportTitle">Raport pakowania</h1>
+        <div class="heroMeta">
+          Monitoruj jakość pakowania, braki, błędy i efektywność zespołu.<br>
+          Ostatnie odświeżenie: <b id="lastRefresh">-</b> |
+          Auto odświeżanie: <b id="autoRefreshLabel">co 30 sekund</b> |
+          Załadowano wpisów: <b id="loadedRows">0</b>
         </div>
       </div>
-    </div>
 
-    <div class="topbarActions">
-      <button class="lightBtn" onclick="goToModeScreen()">Zmień tryb</button>
-      <button class="danger" onclick="logout()">Wyloguj</button>
-    </div>
-  </div>
-
-  <div id="modeScreen" class="card">
-    <h2>Wybierz tryb pracy</h2>
-    <p class="muted">Pracownik najpierw dołącza do stanowiska. Lider widzi obecnych ludzi i dopiero wtedy rozdaje im posiłki.</p>
-
-    <div class="modeGrid">
-      <div class="modeCard" onclick="showLeaderSetup()">
-        <h2>👑 Lider</h2>
-        <p class="muted">Tworzysz stanowisko, skanujesz torby i zarządzasz przydziałem posiłków.</p>
-      </div>
-
-      <div class="modeCard" onclick="showWorkerSetup()">
-        <h2>👷 Pracownik</h2>
-        <p class="muted">Dołączasz do stanowiska i czekasz na przydział od lidera.</p>
-      </div>
-    </div>
-  </div>
-
-  <div id="leaderSetupScreen" class="card hidden">
-    <h2>👑 Utwórz stanowisko</h2>
-    <p class="muted">Wpisz nazwę stanowiska, np. STANOWISKO 1, LINIA A, STÓŁ 2.</p>
-
-    <div class="grid2">
-      <input id="newLineName" placeholder="Nazwa stanowiska">
-      <button onclick="createLine()">Utwórz stanowisko</button>
-    </div>
-
-    <p id="leaderSetupStatus" class="statusBox muted"></p>
-  </div>
-
-  <div id="workerSetupScreen" class="card hidden">
-    <h2>👷 Dołącz do stanowiska</h2>
-    <p class="muted">Wybierz stanowisko. Nie wybierasz posiłków — zrobi to lider.</p>
-
-    <div class="grid2">
-      <div class="formGroup">
-        <label>Stanowisko</label>
-        <select id="lineSelect"></select>
-      </div>
-      <div class="formGroup">
-        <label>Odśwież listę</label>
-        <button class="lightBtn" onclick="loadLines()">Odśwież stanowiska</button>
+      <div class="heroActions">
+        <button id="refreshButton" class="ghostBtn" onclick="loadReport()">↻ Odśwież</button>
+        <button id="exportButton" class="secondaryBtn" onclick="exportExcel()">Eksport Excel</button>
+        <button class="dangerBtn" onclick="logout()">Wyloguj</button>
       </div>
     </div>
 
-    <button onclick="joinAsWorker()">Dołącz jako pracownik</button>
-    <p id="workerSetupStatus" class="statusBox muted"></p>
-  </div>
+    <section id="summaryView" class="view active">
+      <div class="kpiGrid">
+        <div class="kpiCard">
+          <div class="kpiTop">
+            <div class="kpiLabel">Finalnie zapakowane</div>
+            <div class="kpiIcon logoKpiIcon">
+              <img src="logo.png" alt="logo">
+            </div>
+          </div>
+          <div class="kpiValue" id="totalToday">0 / 0</div>
+          <div class="kpiHint">Bez statusu BRAKI</div>
+        </div>
 
-  <div id="leaderScreen" class="hidden">
-    <div class="leaderControlGrid">
-      <div class="leaderControlCard">
-        <div class="controlLabel">Status live</div>
-        <div class="controlValue"><span class="liveDot"></span>Online</div>
+        <div class="kpiCard">
+          <div class="kpiTop">
+            <div class="kpiLabel">Poprawne</div>
+            <div class="kpiIcon okIcon">✓</div>
+          </div>
+          <div class="kpiValue ok" id="correctToday">0</div>
+          <div class="kpiHint">Torby zamknięte OK</div>
+        </div>
+
+        <div class="kpiCard">
+          <div class="kpiTop">
+            <div class="kpiLabel">Niepoprawne</div>
+            <div class="kpiIcon badIcon">!</div>
+          </div>
+          <div class="kpiValue bad" id="badToday">0</div>
+          <div class="kpiHint">Wymaga kontroli</div>
+        </div>
+
+        <div class="kpiCard">
+          <div class="kpiTop">
+            <div class="kpiLabel">Braki</div>
+            <div class="kpiIcon warnIcon">●</div>
+          </div>
+          <div class="kpiValue warn" id="brakiToday">0</div>
+          <div class="kpiHint">Do dopakowania</div>
+        </div>
+
+        <div class="kpiCard">
+          <div class="kpiTop">
+            <div class="kpiLabel">Poprawność finalnych</div>
+            <div class="kpiIcon okIcon">◎</div>
+          </div>
+          <div class="kpiValue" id="accuracyToday">0%</div>
+          <div class="kpiHint">Poprawne / finalne</div>
+        </div>
+
+        <div class="kpiCard">
+          <div class="kpiTop">
+            <div class="kpiLabel">Śr. czas / torba</div>
+            <div class="kpiIcon">◷</div>
+          </div>
+          <div class="kpiValue" id="avgTime">0s</div>
+          <div class="kpiHint">Średni czas pakowania</div>
+        </div>
       </div>
 
-      <div class="leaderControlCard">
-        <div class="controlLabel">Torby w kolejce</div>
-        <div class="controlValue" id="leaderActiveBagsCount">0</div>
-      </div>
-
-      <div class="leaderControlCard">
-        <div class="controlLabel">Pracownicy</div>
-        <div class="controlValue" id="leaderMembersCount">0</div>
-      </div>
-
-      <div class="leaderControlCard">
-        <div class="controlLabel">Błędne / braki</div>
-        <div class="controlValue bad" id="leaderBadBagsCount">0</div>
-      </div>
-    </div>
-
-    <div class="leaderTabs">
-      <button id="leaderScanTabBtn" class="active" onclick="showLeaderTab('scan')">📦 Skanowanie toreb</button>
-      <button id="leaderMembersTabBtn" onclick="showLeaderTab('members')">👥 Pracownicy i posiłki</button>
-    </div>
-
-    <div id="leaderScanTab">
-      <div class="leaderScanLayout">
-        <div class="card">
-          <h2>📦 Skanuj torby do kolejki</h2>
-
-          <input id="leaderBagInput" class="scanInput" placeholder="Zeskanuj torbę" autocomplete="off">
-          <p id="leaderStatus" class="statusBox muted"></p>
-
-          <div class="grid2">
-            <button class="lightBtn" onclick="refreshLeaderData()">Odśwież</button>
-            <button class="danger" onclick="closeCurrentLine()">Zamknij stanowisko</button>
+      <div>
+        <div class="progressHero">
+          <div class="progressMain">
+            <div class="progressInfo">
+              <div class="label">Postęp dnia</div>
+              <div class="progressBig" id="summaryProgressText">0%</div>
+              <div class="small" id="summaryProgressSub">Spakowano 0 z 0 toreb.</div>
+            </div>
+            <div class="pill bluePill">● Live</div>
+          </div>
+          <div class="progressBar">
+            <div class="progressFill" id="totalProgressFill"></div>
           </div>
         </div>
 
+        <div class="forecastGrid">
+          <div class="forecastCard">
+            <div class="label">Pozostało do spakowania</div>
+            <div class="forecastValue" id="summaryRemainingBags">0</div>
+            <div class="small">Na podstawie planu dnia.</div>
+          </div>
+
+          <div class="forecastCard">
+            <div class="label">Tempo ostatniej godziny</div>
+            <div class="forecastValue" id="summaryHourlyPace">0 / h</div>
+            <div class="small">Finalnie zamknięte torby.</div>
+          </div>
+
+          <div class="forecastCard">
+            <div class="label">Szacowany czas do końca</div>
+            <div class="forecastValue" id="summaryEta">-</div>
+            <div class="small">Według tempa ostatniej godziny.</div>
+          </div>
+
+          <div class="forecastCard">
+            <div class="label">Jakość / ryzyko</div>
+            <div class="forecastValue" id="summaryQualityRisk">0</div>
+            <div class="small">Niepoprawne + braki.</div>
+          </div>
+        </div>
+
+        <div class="miniGrid">
+          <div class="card">
+            <div class="cardTitleRow">
+              <h2>🕘 Ostatnie torby</h2>
+              <button class="lightBtn" onclick="showReportTab('history')">Historia</button>
+            </div>
+            <div id="summaryRecentHistory" class="small">Brak danych.</div>
+          </div>
+
+          <div class="card">
+            <div class="cardTitleRow">
+              <h2>🏆 Ranking pracowników</h2>
+              <button class="lightBtn" onclick="showReportTab('workers')">Pełny ranking</button>
+            </div>
+            <div id="summaryTopWorkers" class="small">Brak danych.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="historyView" class="view">
+      <div class="card">
+        <div class="cardTitleRow">
+          <div>
+            <h2>🧾 Historia pakowania</h2>
+            <div class="small">Szukaj po torbie, statusie albo pracowniku. Kliknij QR torby, żeby zobaczyć szczegóły.</div>
+          </div>
+        </div>
+
+        <div class="filtersCard">
+          <div class="filterGroup">
+            <label>QR torby</label>
+            <input id="bagSearch" placeholder="Szukaj QR torby..." oninput="resetHistoryPageAndRender()">
+          </div>
+
+          <div class="filterGroup">
+            <label>Status</label>
+            <select id="statusFilter" onchange="resetHistoryPageAndRender()">
+              <option value="">Wszystkie statusy</option>
+              <option value="POPRAWNA">Tylko poprawne</option>
+              <option value="NIEPOPRAWNA">Tylko niepoprawne</option>
+              <option value="BRAKI">Tylko braki</option>
+            </select>
+          </div>
+
+          <div class="filterGroup">
+            <label>Pracownik</label>
+            <select id="workerFilter" onchange="resetHistoryPageAndRender()">
+              <option value="">Wszyscy pracownicy</option>
+            </select>
+          </div>
+
+          <button class="lightBtn" onclick="clearHistoryFilters()">Wyczyść</button>
+          <button class="secondaryBtn" onclick="exportExcel()">Eksport</button>
+        </div>
+
+        <div id="historyTable"></div>
+      </div>
+    </section>
+
+    <section id="stationsView" class="view">
+      <div class="card">
+        <div class="cardTitleRow">
+          <div>
+            <h2>🧑‍🍳 Stanowiska</h2>
+            <div class="small">Podgląd aktywnych stanowisk, kolejek, pracowników i postępu.</div>
+          </div>
+          <button class="ghostBtn" onclick="loadStations()">Odśwież stanowiska</button>
+        </div>
+
+        <div id="stationsGrid" class="stationsGrid">
+          <div class="small">Ładuję stanowiska...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="workersView" class="view">
+      <div class="workerAdminLayout">
         <div>
           <div class="card">
-            <h2>📋 Aktywna kolejka stanowiska</h2>
-            <div id="leaderQueue" class="queueList"></div>
+            <div class="employeeToolbar">
+              <div>
+                <h2 style="margin:0;">👥 Pracownicy</h2>
+                <div class="small">Lista workerów, ich nazwy wyświetlane oraz status kodu QR.</div>
+              </div>
+              <button class="primaryBtn" onclick="openEmployeePanel()">+ Dodaj pracownika</button>
+            </div>
+
+            <input id="employeeSearch" placeholder="Szukaj po nazwie lub loginie..." oninput="renderEmployeeDirectory()">
+            <div style="height:14px;"></div>
+            <div id="employeeDirectory"></div>
           </div>
 
           <div class="card">
-            <div class="historyHeaderRow">
+            <div class="cardTitleRow">
               <div>
-                <h2>🕘 Historia stanowiska</h2>
+                <h2>🏆 Ranking z raportu</h2>
+                <div class="small">Kliknij nagłówki, żeby sortować.</div>
               </div>
-              <button class="lightBtn" onclick="loadLineHistory()">Odśwież historię</button>
             </div>
-            <div id="leaderHistory" class="historyList"></div>
+            <div id="workersTable"></div>
+          </div>
+        </div>
+
+        <div id="employeePanel" class="sidePanelMock">
+          <div class="cardTitleRow">
+            <h2>Nowy pracownik</h2>
+            <button class="lightBtn" style="width:auto;" onclick="clearEmployeeForm()">Wyczyść</button>
+          </div>
+
+          <label class="label">Login pracownika</label>
+          <input id="newWorkerLogin" placeholder="np. daria">
+
+          <label class="label">Nazwa wyświetlana</label>
+          <input id="newWorkerDisplayName" placeholder="np. Daria Malczewska">
+
+          <label class="label">Hasło startowe</label>
+          <input id="newWorkerPassword" type="password" placeholder="Wpisz hasło dla pracownika">
+
+          <label class="label">Rola</label>
+          <input value="worker" disabled>
+
+          <button id="createWorkerButton" class="primaryBtn" style="width:100%;" onclick="createWorker()">
+            Zapisz pracownika
+          </button>
+
+          <p id="employeeStatus" class="employeeStatus"></p>
+
+          <div class="small" style="margin-top:14px;">
+            Po zapisaniu pracownik będzie miał rolę <b>worker</b>. Kod QR, jeśli Edge Function go generuje, zostanie ustawiony w tle.
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div id="leaderMembersTab" class="hidden">
-      <div class="leaderMembersLayout">
+    <section id="settingsView" class="view">
+      <div class="settingsSlimGrid">
         <div class="card">
-          <h2>👥 Pracownicy na stanowisku</h2>
-          <div id="membersList" class="memberList"></div>
-        </div>
+          <h2>📊 Raport</h2>
 
-        <div class="card">
-          <h2 id="assignmentTitle">Przydział posiłków</h2>
-          <p class="muted" id="assignmentHint">Wybierz pracownika z listy po lewej.</p>
-
-          <input id="assignWorkerEmail" type="hidden">
-
-          <div class="formGroup">
-            <label>Posiłki dla pracownika</label>
-            <div id="leaderMealsBox" class="mealGrid"></div>
+          <div class="settingRow">
+            <div>
+              <b>Odświeżanie raportu</b>
+              <div class="small">Jak często raport ma pobierać nowe dane.</div>
+            </div>
+            <select id="reportRefreshSelect" style="width:150px;" onchange="updateRefreshInterval()">
+              <option value="30">30 sek.</option>
+              <option value="60">60 sek.</option>
+              <option value="120">120 sek.</option>
+            </select>
           </div>
 
-          <button onclick="saveSelectedMemberMeals()">💾 Zapisz przydział</button>
-          <button class="danger" style="margin-top:10px;" onclick="clearSelectedMemberMeals()">Usuń przydział</button>
-          <p id="assignmentStatus" class="statusBox muted"></p>
+          <div class="settingRow">
+            <div>
+              <b>Historia na stronę</b>
+              <div class="small">Liczba wpisów pokazywana jednocześnie w Historii.</div>
+            </div>
+            <select id="historyPageSizeSelect" style="width:150px;" onchange="updateHistoryPageSize()">
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="250">250</option>
+              <option value="500">500</option>
+              <option value="1000" selected>1000</option>
+              <option value="2000">2000</option>
+            </select>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <div id="workerScreen" class="hidden">
-    <div class="workerLayout">
-      <div>
-        <div id="workerAssignmentBox" class="assignmentBanner">Czekam na przydział od lidera...</div>
-        <div id="currentTaskBox" class="taskCard">
-          <div class="emptyState">Brak zadania. Czekam na torby w kolejce...</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>⏭️ Kolejne zadania</h2>
-        <div id="nextTasks" class="nextList"></div>
-      </div>
-    </div>
-  </div>
+    </section>
+  </main>
 </div>
 
-<div id="bagDetailsModal" class="modalBg hidden">
+<div id="detailsModal" class="modalBg hidden">
   <div class="modal">
     <div class="modalHeader">
-      <h2 id="bagDetailsTitle">Szczegóły torby</h2>
-      <button class="danger" style="width:auto;" onclick="closeBagDetails()">Zamknij</button>
+      <h2 id="detailsModalTitle">📦 Szczegóły</h2>
+      <button class="closeBtn" onclick="closeDetails()">Zamknij</button>
     </div>
-    <div id="bagDetailsContent"></div>
+    <div id="detailsContent"></div>
   </div>
 </div>
 
-<div id="confirmModal" class="modalBg hidden">
-  <div class="modal confirmModal">
-    <h2 id="confirmTitle">Potwierdź akcję</h2>
-    <p id="confirmText" class="confirmText"></p>
-    <div id="confirmDetails" class="confirmDetails hidden"></div>
-    <div id="confirmButtons"></div>
-  </div>
-</div>
-
-<script>
-const PROJECT_URL = "https://lanmmbpqxmenyjwvwpkt.supabase.co";
-const PUBLISHABLE_KEY = "sb_publishable_sYrinkI1u2zr9uXZwsERNg_HE0wQKsC";
-const LOGIN_DOMAIN = "@pakowanie.local";
-
-const supabaseClient = window.supabase.createClient(PROJECT_URL, PUBLISHABLE_KEY);
-
-let currentUser = null;
-let currentAccessToken = "";
-let currentRole = null;
-let currentLoginMode = "";
-let currentMode = null;
-let currentLineId = null;
-let currentLineName = "";
-let leaderActiveTab = "scan";
-let selectedMemberEmail = "";
-let myAssignedMeals = [];
-let taskList = [];
-let currentTask = null;
-let currentBadScan = null;
-let refreshTimer = null;
-let audioCtx = null;
-let isBusy = false;
-
-const SESSION_MODE_KEY = "pakowanie_station_mode";
-const SESSION_LINE_KEY = "pakowanie_station_line_id";
-
-function el(id) { return document.getElementById(id); }
-
-function normalizeQr(value) {
-  return String(value || "")
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, "")
-    .replaceAll("Ś", "S")
-    .replaceAll("Ą", "A")
-    .replaceAll("Ć", "C")
-    .replaceAll("Ę", "E")
-    .replaceAll("Ł", "L")
-    .replaceAll("Ń", "N")
-    .replaceAll("Ó", "O")
-    .replaceAll("Ź", "Z")
-    .replaceAll("Ż", "Z");
-}
-
-function setStationSession(mode, lineId = "") {
-  try {
-    if (mode) sessionStorage.setItem(SESSION_MODE_KEY, mode);
-    else sessionStorage.removeItem(SESSION_MODE_KEY);
-
-    if (lineId) sessionStorage.setItem(SESSION_LINE_KEY, lineId);
-    else sessionStorage.removeItem(SESSION_LINE_KEY);
-  } catch(e) {}
-}
-
-function getStationSessionMode() {
-  try { return sessionStorage.getItem(SESSION_MODE_KEY) || ""; }
-  catch(e) { return ""; }
-}
-
-function getStationSessionLineId() {
-  try { return sessionStorage.getItem(SESSION_LINE_KEY) || ""; }
-  catch(e) { return ""; }
-}
-
-function clearStationSession() {
-  setStationSession("", "");
-}
-
-async function cleanupPreviousWorkerSessionIfNeeded() {
-  const previousMode = getStationSessionMode();
-  const previousLineId = getStationSessionLineId();
-
-  if (previousMode === "worker" && previousLineId) {
-    await leaveMyStationLine(previousLineId);
-  }
-
-  if (previousMode === "worker") {
-    clearStationSession();
-  }
-}
-
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, m => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#039;"
-  }[m]));
-}
-
-function escapeJs(value) {
-  return String(value ?? "")
-    .replace(/\\/g, "\\\\")
-    .replace(/'/g, "\\'")
-    .replace(/\n/g, "\\n")
-    .replace(/\r/g, "");
-}
-
-function getEmail(value) {
-  const login = String(value || "").trim().toLowerCase();
-  if (!login) return "";
-  if (login.includes("@")) return login;
-  return login + LOGIN_DOMAIN;
-}
-
-function displayLogin(value) {
-  return String(value || "").toLowerCase().replace(LOGIN_DOMAIN, "");
-}
-
-function normalizeQrToken(value) {
-  return String(value || "").trim().replace(/\s+/g, "");
-}
-
-function normalizeStatus(status) {
-  const value = String(status || "").toUpperCase().trim();
-
-  if (value === "NIEPRAWIDŁOWA") return "NIEPOPRAWNA";
-  if (value === "DO_DOPAKOWANIA" || value === "DO DOPAKOWANIA") return "BRAKI";
-
-  return value;
-}
-
-function formatDateTimePL(dateText) {
-  if (!dateText) return "-";
-  const d = new Date(dateText);
-  if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleString("pl-PL");
-}
-
-function setStatus(id, text, type = "muted") {
-  const box = el(id);
-  if (!box) return;
-  box.innerText = text;
-  box.className = "statusBox " + type;
-}
-
-function showLoginMessage(text, type = "error") {
-  el("loginStatus").innerText = text;
-  el("loginStatus").className = "loginStatus " + type;
-}
-
-function togglePasswordLogin() {
-  const box = el("passwordLoginBox");
-  const btn = el("togglePasswordLoginBtn");
-  const willOpen = box.classList.contains("hidden");
-
-  box.classList.toggle("hidden", !willOpen);
-  btn.innerText = willOpen
-    ? "Ukryj logowanie login / hasło"
-    : "Logowanie login / hasło";
-
-  if (willOpen) setTimeout(() => el("email").focus(), 80);
-  else setTimeout(() => el("qrLoginInput").focus(), 80);
-}
-
-function focusQrInput() {
-  setTimeout(() => {
-    el("qrLoginInput")?.focus();
-    el("qrLoginInput")?.click();
-  }, 80);
-}
-
-function focusLeaderBagInput() {
-  setTimeout(() => {
-    el("leaderBagInput")?.focus();
-    el("leaderBagInput")?.click();
-  }, 60);
-}
-
-function focusTrayScanInput() {
-  setTimeout(() => {
-    el("trayScanInput")?.focus();
-    el("trayScanInput")?.click();
-  }, 60);
-}
-
-function showChoiceModal({ title, text, details = "", buttons = [] }) {
-  return new Promise(resolve => {
-    el("confirmTitle").innerText = title || "Potwierdź akcję";
-    el("confirmText").innerText = text || "";
-
-    if (details) {
-      el("confirmDetails").innerHTML = details;
-      el("confirmDetails").classList.remove("hidden");
-    } else {
-      el("confirmDetails").innerHTML = "";
-      el("confirmDetails").classList.add("hidden");
-    }
-
-    el("confirmButtons").innerHTML = buttons.map((btn, index) => `
-      <button class="modalBtn ${btn.className || "btnAnother"}" data-index="${index}">
-        ${escapeHtml(btn.label)}
-      </button>
-    `).join("");
-
-    [...el("confirmButtons").querySelectorAll("button")].forEach(button => {
-      button.onclick = () => {
-        const index = Number(button.dataset.index);
-        const value = buttons[index]?.value;
-        el("confirmModal").classList.add("hidden");
-        resolve(value);
-      };
-    });
-
-    el("confirmModal").classList.remove("hidden");
-  });
-}
-
-function sound(type) {
-  try {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    if (audioCtx.state === "suspended") {
-      audioCtx.resume();
-    }
-
-    if (type === "ok") {
-      // Dobra tacka / poprawna akcja — przyjemny krótki pik
-      playTone(1050, 0.16, 0.09, "sine");
-    }
-
-    if (type === "bad" || type === "duplicate") {
-      // Zła tacka i duplikat — mocny niski alarm
-      playTone(180, 0.22, 0.28, "sawtooth");
-      setTimeout(() => playTone(140, 0.24, 0.34, "sawtooth"), 300);
-      setTimeout(() => playTone(110, 0.25, 0.42, "sawtooth"), 660);
-    }
-
-    if (type === "warn") {
-      // Lekkie ostrzeżenie / informacja
-      playTone(480, 0.18, 0.18, "triangle");
-      setTimeout(() => playTone(620, 0.16, 0.18, "triangle"), 220);
-    }
-
-    if (type === "done") {
-      // OK TORBA / BRAKI / NIEPOPRAWNA — trzytonowy sukces
-      playTone(850, 0.16, 0.10, "sine");
-      setTimeout(() => playTone(1050, 0.16, 0.10, "sine"), 130);
-      setTimeout(() => playTone(1300, 0.18, 0.16, "sine"), 270);
-    }
-
-    if (type === "login") {
-      // Logowanie OK
-      playTone(900, 0.14, 0.08, "sine");
-      setTimeout(() => playTone(1200, 0.14, 0.10, "sine"), 110);
-    }
-
-  } catch(e) {}
-}
-
-function playTone(freq, volume, duration, waveType = "sine") {
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-
-  osc.type = waveType;
-  osc.frequency.value = freq;
-
-  gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(volume, audioCtx.currentTime + 0.015);
-  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-
-  osc.start();
-  osc.stop(audioCtx.currentTime + duration + 0.03);
-}
-
-async function getUserRole(userId) {
-  const { data, error } = await supabaseClient
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .single();
-
-  if (error || !data) return null;
-  return data.role;
-}
-
-function hasAccess(role) {
-  return ["worker", "manager", "admin"].includes(role);
-}
-
-function translateLoginError(errorMessage) {
-  const msg = String(errorMessage || "").toLowerCase();
-
-  if (msg.includes("invalid login credentials")) return "Nieprawidłowy login lub hasło.";
-  if (msg.includes("email not confirmed")) return "Konto nie zostało potwierdzone.";
-  if (msg.includes("user not found")) return "Nieznany użytkownik.";
-  if (msg.includes("invalid email")) return "Nieprawidłowy login.";
-  if (msg.includes("network") || msg.includes("failed to fetch")) return "Brak połączenia z internetem lub Supabase.";
-
-  return "Nie udało się zalogować. Sprawdź login i hasło.";
-}
-
-async function enterAppAfterLogin(user, role, accessToken, loginMode) {
-  currentUser = user;
-  currentAccessToken = accessToken || "";
-  currentRole = role;
-  currentLoginMode = loginMode || "";
-
-  if (!hasAccess(currentRole)) {
-    showLoginMessage("❌ Brak dostępu do pakowania stanowiskowego.", "error");
-    sound("bad");
-    return;
-  }
-
-  await cleanupPreviousWorkerSessionIfNeeded();
-
-  el("currentUserLabel").innerText = displayLogin(currentUser.email);
-  el("loginScreen").classList.add("hidden");
-  el("appScreen").classList.remove("hidden");
-
-  await loadLines();
-  await loadMeals();
-  await goToModeScreen();
-
-  sound("login");
-}
-
-async function qrLogin() {
-  const rawToken = normalizeQrToken(el("qrLoginInput").value);
-
-  el("loginStatus").className = "loginStatus";
-  el("loginStatus").innerText = "";
-
-  if (!rawToken) {
-    showLoginMessage("Zeskanuj kod QR pracownika.", "error");
-    sound("bad");
-    focusQrInput();
-    return;
-  }
-
-  el("qrLoginBtn").disabled = true;
-  el("qrLoginBtn").innerText = "Sprawdzam QR...";
-  showLoginMessage("⏳ Sprawdzam kod QR...", "info");
-
-  try {
-    const res = await fetch(`${PROJECT_URL}/functions/v1/qr-login-session`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": PUBLISHABLE_KEY
-      },
-      body: JSON.stringify({
-        raw_token: rawToken,
-        token: rawToken
-      })
-    });
-
-    const json = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      throw new Error(json.error || json.message || "Nie udało się zalogować kodem QR.");
-    }
-
-    const session = json.session || json.data?.session || json;
-    const accessToken = session.access_token || json.access_token;
-    const refreshToken = session.refresh_token || json.refresh_token;
-
-    if (!accessToken || !refreshToken) {
-      throw new Error("Funkcja QR nie zwróciła pełnej sesji Supabase.");
-    }
-
-    const { data: setData, error: setError } = await supabaseClient.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken
-    });
-
-    if (setError) throw new Error(setError.message);
-
-    const user = setData?.user || setData?.session?.user || json.user || json.data?.user;
-
-    if (!user || !user.id || !user.email) {
-      throw new Error("Nie udało się odczytać użytkownika po logowaniu QR.");
-    }
-
-    const role = json.role || json.user_role || json.data?.role || json.data?.user_role || await getUserRole(user.id);
-
-    if (!hasAccess(role)) {
-      await supabaseClient.auth.signOut();
-      throw new Error("Ten kod QR nie ma dostępu do pakowania stanowiskowego.");
-    }
-
-    el("qrLoginInput").value = "";
-    showLoginMessage("✅ Zalogowano kodem QR jako: " + displayLogin(user.email), "ok");
-
-    await enterAppAfterLogin(user, role, accessToken, "qr");
-
-  } catch (err) {
-    showLoginMessage("❌ Nie udało się zalogować QR: " + err.message, "error");
-    sound("bad");
-    el("qrLoginInput").value = "";
-    focusQrInput();
-  } finally {
-    el("qrLoginBtn").disabled = false;
-    el("qrLoginBtn").innerText = "Zaloguj kodem QR";
-  }
-}
-
-async function login() {
-  showLoginMessage("⏳ Loguję...", "info");
-
-  const email = getEmail(el("email").value);
-  const password = el("password").value;
-
-  if (!email || !password) {
-    showLoginMessage("❌ Wpisz login i hasło.", "error");
-    sound("bad");
-    return;
-  }
-
-  el("loginBtn").disabled = true;
-  el("loginBtn").innerText = "Loguję...";
-
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
-  el("loginBtn").disabled = false;
-  el("loginBtn").innerText = "Zaloguj loginem i hasłem";
-
-  if (error) {
-    showLoginMessage("❌ " + translateLoginError(error.message), "error");
-    sound("bad");
-    return;
-  }
-
-  const role = await getUserRole(data.user.id);
-
-  if (!hasAccess(role)) {
-    showLoginMessage("❌ Brak dostępu do pakowania stanowiskowego.", "error");
-    sound("bad");
-    return;
-  }
-
-  showLoginMessage("✅ Zalogowano jako: " + displayLogin(data.user.email), "ok");
-
-  await enterAppAfterLogin(
-    data.user,
-    role,
-    data.session?.access_token || "",
-    "password"
-  );
-}
-
-async function leaveMyStationLine(lineId = null) {
-  try {
-    const { data, error } = await supabaseClient.rpc("leave_my_station_line", {
-      target_line_id: lineId
-    });
-
-    if (error) {
-      console.warn("Nie udało się opuścić stanowiska:", error);
-      return false;
-    }
-
-    return data === "OK";
-  } catch (err) {
-    console.warn("Błąd opuszczania stanowiska:", err);
-    return false;
-  }
-}
-
-async function leaveCurrentWorkerIfNeeded() {
-  if (currentMode === "worker" && currentLineId) {
-    await leaveMyStationLine(currentLineId);
-  }
-}
-
-function leaveMyStationLineKeepAlive(lineId = null) {
-  try {
-    if (!currentAccessToken) return;
-
-    fetch(`${PROJECT_URL}/rest/v1/rpc/leave_my_station_line`, {
-      method: "POST",
-      keepalive: true,
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": PUBLISHABLE_KEY,
-        "Authorization": `Bearer ${currentAccessToken}`
-      },
-      body: JSON.stringify({
-        target_line_id: lineId
-      })
-    });
-  } catch (err) {}
-}
-
-async function logout() {
-  stopRefresh();
-  await leaveCurrentWorkerIfNeeded();
-  clearStationSession();
-
-  try {
-    await supabaseClient.auth.signOut();
-  } catch(e) {}
-
-  location.reload();
-}
-
-function hideAllMainScreens() {
-  ["modeScreen", "leaderSetupScreen", "workerSetupScreen", "leaderScreen", "workerScreen"]
-    .forEach(id => el(id).classList.add("hidden"));
-}
-
-async function goToModeScreen() {
-  await leaveCurrentWorkerIfNeeded();
-  stopRefresh();
-
-  currentMode = null;
-  currentLineId = null;
-  currentLineName = "";
-  leaderActiveTab = "scan";
-  selectedMemberEmail = "";
-  myAssignedMeals = [];
-  taskList = [];
-  currentTask = null;
-  currentBadScan = null;
-  isBusy = false;
-
-  clearStationSession();
-
-  el("currentLineLabel").innerText = "brak";
-  el("mainTitle").innerText = "Pakowanie stanowiskowe";
-
-  hideAllMainScreens();
-  el("modeScreen").classList.remove("hidden");
-}
-
-function showLeaderSetup() {
-  stopRefresh();
-  hideAllMainScreens();
-  el("leaderSetupScreen").classList.remove("hidden");
-  setTimeout(() => el("newLineName").focus(), 80);
-}
-
-async function showWorkerSetup() {
-  stopRefresh();
-  hideAllMainScreens();
-  el("workerSetupScreen").classList.remove("hidden");
-  await loadLines();
-}
-
-async function loadLines() {
-  const { data, error } = await supabaseClient.rpc("get_active_station_lines");
-
-  if (error) {
-    setStatus("workerSetupStatus", "❌ Nie udało się pobrać stanowisk: " + error.message, "bad");
-    return;
-  }
-
-  const rows = data || [];
-
-  el("lineSelect").innerHTML = rows.length
-    ? rows.map(line => `<option value="${escapeHtml(line.id)}">${escapeHtml(line.name)}</option>`).join("")
-    : `<option value="">Brak aktywnych stanowisk</option>`;
-}
-
-async function loadMeals() {
-  const { data, error } = await supabaseClient.rpc("get_available_meals");
-
-  if (error) {
-    el("leaderMealsBox").innerHTML = `<div class="bad">Nie udało się pobrać posiłków: ${escapeHtml(error.message)}</div>`;
-    return;
-  }
-
-  const meals = (data || []).map(x => x.meal).filter(Boolean);
-
-  if (!meals.length) {
-    el("leaderMealsBox").innerHTML = `<div class="muted">Brak posiłków w planie.</div>`;
-    return;
-  }
-
-  el("leaderMealsBox").innerHTML = meals.map(meal => `
-    <label class="mealOption">
-      <input type="checkbox" value="${escapeHtml(meal)}">
-      <span>${escapeHtml(meal)}</span>
-    </label>
-  `).join("");
-}
-
-async function createLine() {
-  const name = el("newLineName").value.trim();
-
-  if (!name) {
-    setStatus("leaderSetupStatus", "❌ Wpisz nazwę stanowiska.", "bad");
-    sound("bad");
-    return;
-  }
-
-  setStatus("leaderSetupStatus", "⏳ Tworzę stanowisko...", "muted");
-
-  const { data, error } = await supabaseClient.rpc("create_station_line", { line_name: name });
-
-  if (error) {
-    setStatus("leaderSetupStatus", "❌ Błąd tworzenia stanowiska: " + error.message, "bad");
-    sound("bad");
-    return;
-  }
-
-  const result = String(data || "");
-
-  if (result.startsWith("LINE_NAME_EXISTS:")) {
-    const existingId = result.replace("LINE_NAME_EXISTS:", "");
-
-    const choice = await showChoiceModal({
-      title: "⚠️ Stanowisko już istnieje",
-      text: "Wprowadzona nazwa stanowiska jest już aktywna. Możesz wrócić do istniejącego stanowiska albo anulować i wpisać inną nazwę.",
-      details: `Nazwa stanowiska: <b>${escapeHtml(name)}</b>`,
-      buttons: [
-        { label: "Anuluj i zmień nazwę", value: "cancel", className: "btnCancel" },
-        { label: "Wróć do istniejącego stanowiska", value: "use_existing", className: "btnAnother" }
-      ]
-    });
-
-    if (choice !== "use_existing") {
-      setStatus("leaderSetupStatus", "⚠️ Zmień nazwę stanowiska i spróbuj ponownie.", "warn");
-      sound("warn");
-      return;
-    }
-
-    enterLeaderScreen(existingId, name);
-    return;
-  }
-
-  enterLeaderScreen(result, name);
-}
-
-async function enterLeaderScreen(lineId, lineName) {
-  currentLineId = lineId;
-  currentLineName = lineName;
-  currentMode = "leader";
-
-  setStationSession("leader", currentLineId);
-
-  el("currentLineLabel").innerText = currentLineName;
-  el("mainTitle").innerText = "Lider — " + currentLineName;
-
-  hideAllMainScreens();
-  el("leaderScreen").classList.remove("hidden");
-
-  setStatus("leaderStatus", "Gotowe. Skanuj torby do kolejki.", "muted");
-  el("leaderBagInput").value = "";
-
-  await loadMeals();
-  await refreshLeaderData();
-  showLeaderTab("scan");
-  startLeaderRefresh();
-
-  sound("ok");
-}
-
-function showLeaderTab(tab) {
-  leaderActiveTab = tab;
-
-  el("leaderScanTab").classList.toggle("hidden", tab !== "scan");
-  el("leaderMembersTab").classList.toggle("hidden", tab !== "members");
-  el("leaderScanTabBtn").classList.toggle("active", tab === "scan");
-  el("leaderMembersTabBtn").classList.toggle("active", tab === "members");
-
-  if (tab === "scan") focusLeaderBagInput();
-  else loadMembers();
-}
-
-async function getBrakiSessionForBag(bag) {
-  const { data, error } = await supabaseClient.rpc("get_bag_braki_session", {
-    target_bag: bag
-  });
-
-  if (error) {
-    console.warn("Nie udało się sprawdzić BRAKI:", error);
-    return null;
-  }
-
-  return data && data.length ? data[0] : null;
-}
-
-async function ensureLatestStationBagStates(bagQr) {
-  try {
-    const { data, error } = await supabaseClient.rpc("get_station_queue", {
-      target_line_id: currentLineId
-    });
-
-    if (error || !data) return;
-
-    const normalizedBag = normalizeQr(bagQr);
-
-    const rows = data
-      .filter(x => normalizeQr(x.bag_qr) === normalizedBag)
-      .filter(x => ["queued", "in_progress"].includes(String(x.status || "")))
-      .sort((a, b) => Number(b.queue_position || 0) - Number(a.queue_position || 0));
-
-    const latest = rows[0];
-
-    if (!latest?.bag_id) return;
-
-    await supabaseClient.rpc("ensure_station_bag_item_states", {
-      target_bag_id: latest.bag_id
-    });
-  } catch(e) {
-    console.warn("ensureLatestStationBagStates error:", e);
-  }
-}
-
-async function addBagToLineInternal(bag, allowDuplicate = false, options = {}) {
-  const normalizedBag = normalizeQr(bag);
-
-  setStatus("leaderStatus", options.brakiMode ? "⏳ Otwieram torbę BRAKI do dopakowania..." : "⏳ Dodaję torbę do kolejki...", "muted");
-
-  const { data, error } = await supabaseClient.rpc("add_bag_to_station_line", {
-    target_line_id: currentLineId,
-    target_bag_qr: normalizedBag,
-    allow_duplicate: allowDuplicate
-  });
-
-  if (error) {
-    setStatus("leaderStatus", "❌ Błąd: " + error.message, "bad");
-    sound("bad");
-    return false;
-  }
-
-  if (data === "OK") {
-    await ensureLatestStationBagStates(normalizedBag);
-
-    setStatus(
-      "leaderStatus",
-      options.brakiMode
-        ? "🟡 Otworzono torbę BRAKI do dopakowania: " + normalizedBag
-        : "✅ Dodano torbę: " + normalizedBag,
-      options.brakiMode ? "warn" : "ok"
-    );
-
-    el("leaderBagInput").value = "";
-    await refreshLeaderData();
-    sound(options.brakiMode ? "warn" : "ok");
-    return true;
-  }
-
-  if (data === "BAG_ALREADY_ACTIVE") {
-    await handleDuplicateBag(normalizedBag, "active");
-    return false;
-  }
-
-  if (data === "BAG_ALREADY_PACKED") {
-    await handleDuplicateBag(normalizedBag, "packed");
-    return false;
-  }
-
-  if (data === "BAG_NOT_FOUND") {
-    setStatus("leaderStatus", "❌ Brak torby w planie: " + normalizedBag, "bad");
-    sound("bad");
-    return false;
-  }
-
-  if (data === "QUEUE_FULL") {
-    setStatus("leaderStatus", "⚠️ Kolejka pełna. Maksymalnie 10 aktywnych toreb.", "warn");
-    sound("warn");
-    return false;
-  }
-
-  setStatus("leaderStatus", "❌ Nie udało się dodać torby: " + data, "bad");
-  sound("bad");
-  return false;
-}
-
-async function addLeaderBag() {
-  const bag = normalizeQr(el("leaderBagInput").value);
-
-  el("leaderBagInput").value = bag;
-
-  if (!bag || !currentLineId || isBusy) return;
-
-  isBusy = true;
-  setStatus("leaderStatus", "⏳ Sprawdzam torbę...", "muted");
-
-  try {
-    const { data: duplicateCheck, error: duplicateError } = await supabaseClient.rpc("prevent_duplicate_bag_global", {
-      p_bag: bag
-    });
-
-    if (duplicateError) {
-      setStatus("leaderStatus", "❌ Błąd sprawdzania torby: " + duplicateError.message, "bad");
-      sound("bad");
-      return;
-    }
-
-    if (duplicateCheck === "IN_QUEUE") {
-      await handleDuplicateBag(bag, "active");
-      return;
-    }
-
-    const brakiSession = await getBrakiSessionForBag(bag);
-
-    if (brakiSession) {
-      await addBagToLineInternal(bag, false, { brakiMode:true, brakiSession });
-      return;
-    }
-
-    if (duplicateCheck === "IN_HISTORY") {
-      await handleDuplicateBag(bag, "packed");
-      return;
-    }
-
-    await addBagToLineInternal(bag, false);
-
-  } finally {
-    isBusy = false;
-    focusLeaderBagInput();
-  }
-}
-
-async function handleDuplicateBag(bag, duplicateType = "active") {
-  const normalizedBag = normalizeQr(bag);
-  sound("warn");
-
-  const isPacked = duplicateType === "packed";
-
-  const buttons = [
-    { label: "Anuluj i wróć do skanowania", value: "cancel", className: "btnCancel" }
-  ];
-
-  if (isPacked) {
-    buttons.push({
-      label: "Popraw torbę i zastąp ostatni zapis",
-      value: "replace",
-      className: "btnReplace"
-    });
-  }
-
-  buttons.push({
-    label: "Dodaj kolejną torbę z tym samym kodem",
-    value: "duplicate",
-    className: "btnAnother"
-  });
-
-  const choice = await showChoiceModal({
-    title: isPacked ? "⚠️ Torba była już zapakowana" : "⚠️ Torba jest już w aktywnej kolejce",
-    text: isPacked
-      ? "Lider zeskanował torbę, która ma już zakończony zapis. Jeżeli to torba BRAKI, zostanie otwarta automatycznie — tutaj chodzi o zwykły zakończony zapis."
-      : "Lider zeskanował torbę, która jest już aktywna na stanowisku. Możesz anulować albo dodać kolejną fizyczną torbę z tym samym kodem.",
-    details: `Kod torby: <b>${escapeHtml(normalizedBag)}</b><br><br>Wybierz, co chcesz zrobić z tym skanem.`,
-    buttons
-  });
-
-  if (choice === "duplicate") {
-    await addBagToLineInternal(normalizedBag, true);
-    return;
-  }
-
-  if (choice === "replace" && isPacked) {
-    isBusy = true;
-
-    const { data, error } = await supabaseClient.rpc("replace_bag_on_station_line", {
-      target_line_id: currentLineId,
-      target_bag_qr: normalizedBag
-    });
-
-    isBusy = false;
-
-    if (error || data !== "OK") {
-      setStatus("leaderStatus", "❌ Nie udało się zastąpić torby: " + (error?.message || data), "bad");
-      sound("bad");
-      return;
-    }
-
-    await ensureLatestStationBagStates(normalizedBag);
-
-    setStatus("leaderStatus", "✅ Torba została dodana do poprawy: " + normalizedBag, "ok");
-    el("leaderBagInput").value = "";
-    await refreshLeaderData();
-    sound("ok");
-    return;
-  }
-
-  setStatus("leaderStatus", "⚠️ Nie dodano torby.", "warn");
-  focusLeaderBagInput();
-}
-
-async function refreshLeaderData() {
-  await Promise.allSettled([
-    loadQueue(),
-    loadLineHistory(),
-    loadMembers()
-  ]);
-}
-
-async function loadQueue() {
-  if (!currentLineId) return;
-
-  const { data, error } = await supabaseClient.rpc("get_station_queue", {
-    target_line_id: currentLineId
-  });
-
-  if (error) {
-    el("leaderQueue").innerHTML = `<div class="bad">Błąd kolejki: ${escapeHtml(error.message)}</div>`;
-    return;
-  }
-
-  const rows = data || [];
-
-  const activeRows = rows.filter(x => ["queued", "in_progress"].includes(x.status));
-  const activeCount = activeRows.length;
-  const badCount = rows.filter(x => x.has_error || normalizeStatus(x.status) === "BRAKI").length;
-
-  el("leaderActiveBagsCount").innerText = activeCount;
-  el("leaderBadBagsCount").innerText = badCount;
-
-  if (!activeRows.length) {
-    el("leaderQueue").innerHTML = `<div class="emptyState">Brak aktywnych toreb w kolejce.</div>`;
-    return;
-  }
-
-  el("leaderQueue").innerHTML = activeRows.map(row => {
-    const status = normalizeStatus(row.status);
-    const cls =
-      status === "BRAKI" ? "brakiBag" :
-      row.has_error ? "badBag" :
-      "";
-
-    const statusText =
-      row.status === "queued" ? "w kolejce" :
-      row.status === "in_progress" ? "w trakcie" :
-      status === "BRAKI" ? "braki" :
-      row.status || "-";
-
-    return `
-      <div class="queueItem ${cls}">
-        <div onclick="openBagDetails('${escapeJs(row.bag_id)}')">
-          <div class="bagCode">${escapeHtml(row.bag_qr)}</div>
-          <div class="muted">
-            Status: <b>${escapeHtml(statusText)}</b> |
-            Torba: ${escapeHtml(row.queue_position)}
-          </div>
-        </div>
-
-        <div>
-          <div class="progressPill ${status === "BRAKI" ? "warnPill" : ""}">${row.finished_count || 0}/${row.expected_count || 0}</div>
-          <div class="queueActions" style="margin-top:10px;">
-            <button class="lightBtn" onclick="openBagDetails('${escapeJs(row.bag_id)}')">Podgląd</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-async function loadLineHistory() {
-  if (!currentLineId) return;
-
-  const { data, error } = await supabaseClient.rpc("get_station_line_history", {
-    target_line_id: currentLineId,
-    row_limit: 50
-  });
-
-  if (error) {
-    el("leaderHistory").innerHTML = `<div class="bad">Błąd historii: ${escapeHtml(error.message)}</div>`;
-    return;
-  }
-
-  const rows = data || [];
-
-  if (!rows.length) {
-    el("leaderHistory").innerHTML = `<div class="emptyState">Brak historii stanowiska.</div>`;
-    return;
-  }
-
-  el("leaderHistory").innerHTML = rows.map(row => {
-    const status = normalizeStatus(row.status);
-
-    const cls =
-      row.status === "done" ? "doneBag" :
-      row.status === "bad" ? "badBag" :
-      status === "BRAKI" || row.status === "braki" ? "brakiBag" :
-      row.status === "replaced" ? "replacedBag" :
-      row.status === "cancelled" ? "cancelledBag" :
-      "";
-
-    const statusText =
-      row.status === "done" ? "poprawna" :
-      row.status === "bad" ? "niepoprawna" :
-      status === "BRAKI" || row.status === "braki" ? "braki / do dopakowania" :
-      row.status === "replaced" ? "zastąpiona" :
-      row.status === "cancelled" ? "anulowana" :
-      row.status || "-";
-
-    return `
-      <div class="historyItem ${cls}" onclick="openBagDetails('${escapeJs(row.bag_id)}')">
-        <div>
-          <div class="bagCode">${escapeHtml(row.bag_qr)}</div>
-          <div class="muted">
-            Status: <b>${escapeHtml(statusText)}</b> |
-            Zamknięto: ${escapeHtml(formatDateTimePL(row.closed_at))}
-          </div>
-        </div>
-        <div>
-          <div class="progressPill ${status === "BRAKI" || row.status === "braki" ? "warnPill" : ""}">${row.correct_count || 0}/${row.expected_count || 0}</div>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-async function openBagDetails(bagId) {
-  const { data, error } = await supabaseClient.rpc("get_station_bag_details", {
-    target_bag_id: bagId
-  });
-
-  if (error) {
-    await showChoiceModal({
-      title: "❌ Błąd pobierania szczegółów",
-      text: "Nie udało się pobrać aktualnej zawartości torby.",
-      details: `Komunikat błędu:<br><b>${escapeHtml(error.message)}</b>`,
-      buttons: [
-        { label: "Zamknij", value: "close", className: "btnCancel" }
-      ]
-    });
-    return;
-  }
-
-  const rows = data || [];
-  const bagQr = rows[0]?.bag_qr || "-";
-  el("bagDetailsTitle").innerText = "Szczegóły torby: " + bagQr;
-
-  if (!rows.length) {
-    el("bagDetailsContent").innerHTML = `<div class="emptyState">Brak danych torby.</div>`;
-  } else {
-    el("bagDetailsContent").innerHTML = `
-      <table>
-        <thead>
-          <tr>
-            <th>Posiłek</th>
-            <th>Kod</th>
-            <th>Rozmiar</th>
-            <th>Oczekiwana tacka</th>
-            <th>Status</th>
-            <th>Zeskanowano</th>
-            <th>Pracownik</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map(r => {
-            const scanStatus = String(r.scan_status || "brak").toLowerCase();
-
-            const cls =
-              scanStatus === "ok" ? "doneRow" :
-              scanStatus === "brak" ? "brakiRow" :
-              ["wrong", "duplicate", "forced_bad"].includes(scanStatus) ? "badRow" :
-              "";
-
-            const label =
-              scanStatus === "ok" ? "OK" :
-              scanStatus === "brak" ? "BRAK" :
-              scanStatus === "wrong" ? "BŁĘDNA" :
-              scanStatus === "duplicate" ? "DUPLIKAT" :
-              scanStatus === "forced_bad" ? "NIEPOPRAWNA" :
-              "NIE SPAKOWANO";
-
-            return `
-              <tr class="${cls}">
-                <td><b>${escapeHtml(r.meal || "-")}</b></td>
-                <td>${escapeHtml(r.code || "-")}</td>
-                <td>${escapeHtml(r.size || "-")}</td>
-                <td>${escapeHtml(r.expected_tray_qr || "-")}</td>
-                <td class="${scanStatus === "ok" ? "ok" : scanStatus === "brak" ? "warn" : scanStatus === "not_scanned" ? "muted" : "bad"}">${escapeHtml(label)}</td>
-                <td>${escapeHtml(r.scanned_tray_qr || "-")}</td>
-                <td>${escapeHtml(displayLogin(r.scanned_by_email || "-"))}</td>
-              </tr>
-            `;
-          }).join("")}
-        </tbody>
-      </table>
-    `;
-  }
-
-  el("bagDetailsModal").classList.remove("hidden");
-}
-
-function closeBagDetails() {
-  el("bagDetailsModal").classList.add("hidden");
-}
-
-async function loadMembers() {
-  if (!currentLineId) return;
-
-  const { data, error } = await supabaseClient.rpc("get_station_line_members", {
-    target_line_id: currentLineId
-  });
-
-  if (error) {
-    el("membersList").innerHTML = `<div class="bad">Błąd pobierania pracowników: ${escapeHtml(error.message)}</div>`;
-    return;
-  }
-
-  const rows = data || [];
-  el("leaderMembersCount").innerText = rows.length;
-
-  if (!rows.length) {
-    el("membersList").innerHTML = `<div class="emptyState">Nikt jeszcze nie dołączył do stanowiska.</div>`;
-    return;
-  }
-
-  window.stationMembersCache = rows;
-
-  el("membersList").innerHTML = rows.map((row, index) => {
-    const meals = row.meals || [];
-    const mealsText = meals.length ? meals.join(", ") : "brak przydziału";
-    const selectedClass = selectedMemberEmail === row.user_email ? "selectedMember" : "";
-
-    return `
-      <div class="memberItem ${selectedClass}" onclick="selectMemberForEditByIndex(${index})" style="cursor:pointer;">
-        <div>
-          <div class="bagCode">${escapeHtml(displayLogin(row.user_email))}</div>
-          <div class="muted">Posiłki: <b>${escapeHtml(mealsText)}</b></div>
-        </div>
-
-        <div class="memberActions" onclick="event.stopPropagation()">
-          <button class="successBtn" onclick="selectMemberForEditByIndex(${index})">Wybierz / edytuj</button>
-          <button class="danger" onclick="removeMemberMealsByIndex(${index})">Usuń posiłki</button>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-function selectMemberForEditByIndex(index) {
-  const row = window.stationMembersCache?.[index];
-  if (!row) return;
-
-  selectedMemberEmail = row.user_email;
-  el("assignWorkerEmail").value = row.user_email;
-  el("assignmentTitle").innerText = "Przydział: " + displayLogin(row.user_email);
-  el("assignmentHint").innerText = "Zaznacz posiłki, które ten pracownik ma pakować teraz.";
-
-  const meals = row.meals || [];
-
-  [...el("leaderMealsBox").querySelectorAll("input[type='checkbox']")].forEach(input => {
-    input.checked = meals.includes(input.value);
-  });
-
-  setStatus("assignmentStatus", "Edytujesz przydział dla: " + row.user_email, "muted");
-}
-
-async function saveSelectedMemberMeals() {
-  const email = selectedMemberEmail || el("assignWorkerEmail").value;
-  const checked = [...el("leaderMealsBox").querySelectorAll("input[type='checkbox']:checked")];
-  const meals = checked.map(x => x.value);
-
-  if (!currentLineId) {
-    setStatus("assignmentStatus", "❌ Brak aktywnego stanowiska.", "bad");
-    return;
-  }
-
-  if (!email) {
-    setStatus("assignmentStatus", "❌ Wybierz pracownika z listy.", "bad");
-    sound("bad");
-    return;
-  }
-
-  if (!meals.length) {
-    setStatus("assignmentStatus", "❌ Wybierz minimum jeden posiłek albo użyj przycisku Usuń przydział.", "bad");
-    sound("bad");
-    return;
-  }
-
-  setStatus("assignmentStatus", "⏳ Zapisuję przydział...", "muted");
-
-  const { data, error } = await supabaseClient.rpc("assign_station_worker_meals", {
-    target_line_id: currentLineId,
-    worker_email: email,
-    target_meals: meals
-  });
-
-  if (error || data !== "OK") {
-    setStatus("assignmentStatus", "❌ Nie udało się zapisać przydziału: " + (error?.message || data), "bad");
-    sound("bad");
-    return;
-  }
-
-  setStatus("assignmentStatus", "✅ Zapisano przydział dla: " + email, "ok");
-  await loadMembers();
-  sound("ok");
-}
-
-async function clearSelectedMemberMeals() {
-  const email = selectedMemberEmail || el("assignWorkerEmail").value;
-
-  if (!email) {
-    setStatus("assignmentStatus", "❌ Wybierz pracownika z listy.", "bad");
-    return;
-  }
-
-  await removeMemberMeals(email);
-}
-
-async function removeMemberMealsByIndex(index) {
-  const row = window.stationMembersCache?.[index];
-  if (!row) return;
-  await removeMemberMeals(row.user_email);
-}
-
-async function removeMemberMeals(email) {
-  if (!currentLineId || !email) return;
-
-  const choice = await showChoiceModal({
-    title: "🗑️ Usunąć przydział posiłków?",
-    text: "Pracownik zostanie na stanowisku, ale nie będzie miał żadnych aktywnych posiłków do pakowania.",
-    details: `Pracownik: <b>${escapeHtml(displayLogin(email))}</b>`,
-    buttons: [
-      { label: "Anuluj", value: "cancel", className: "btnCancel" },
-      { label: "Usuń przydział posiłków", value: "remove", className: "btnReplace" }
-    ]
-  });
-
-  if (choice !== "remove") return;
-
-  const { data, error } = await supabaseClient.rpc("remove_station_worker_assignment", {
-    target_line_id: currentLineId,
-    worker_email: email
-  });
-
-  if (error || data !== "OK") {
-    setStatus("assignmentStatus", "❌ Nie udało się usunąć przydziału: " + (error?.message || data), "bad");
-    sound("bad");
-    return;
-  }
-
-  if (selectedMemberEmail === email) {
-    selectedMemberEmail = "";
-    el("assignWorkerEmail").value = "";
-    el("assignmentTitle").innerText = "Przydział posiłków";
-    el("assignmentHint").innerText = "Wybierz pracownika z listy po lewej.";
-    [...el("leaderMealsBox").querySelectorAll("input[type='checkbox']")].forEach(input => input.checked = false);
-  }
-
-  setStatus("assignmentStatus", "✅ Usunięto przydział dla: " + email, "ok");
-  await loadMembers();
-  sound("warn");
-}
-
-async function closeCurrentLine() {
-  if (!currentLineId) return;
-
-  const choice = await showChoiceModal({
-    title: "🔒 Zamknąć stanowisko?",
-    text: "Po zamknięciu stanowisko nie będzie już aktywne dla pracowników. Aktywne torby zostaną anulowane.",
-    details: `Stanowisko: <b>${escapeHtml(currentLineName)}</b>`,
-    buttons: [
-      { label: "Anuluj", value: "cancel", className: "btnCancel" },
-      { label: "Zamknij stanowisko", value: "close", className: "btnReplace" }
-    ]
-  });
-
-  if (choice !== "close") return;
-
-  const { data, error } = await supabaseClient.rpc("close_station_line", {
-    target_line_id: currentLineId
-  });
-
-  if (error || data !== "OK") {
-    setStatus("leaderStatus", "❌ Nie udało się zamknąć stanowiska: " + (error?.message || data), "bad");
-    sound("bad");
-    return;
-  }
-
-  setStatus("leaderStatus", "✅ Stanowisko zamknięte.", "ok");
-  sound("done");
-  setTimeout(() => goToModeScreen(), 700);
-}
-
-async function joinAsWorker() {
-  const lineId = el("lineSelect").value;
-  const lineOption = el("lineSelect").selectedOptions[0];
-  const lineName = lineOption ? lineOption.textContent : "";
-
-  if (!lineId) {
-    setStatus("workerSetupStatus", "❌ Wybierz stanowisko.", "bad");
-    sound("bad");
-    return;
-  }
-
-  await cleanupPreviousWorkerSessionIfNeeded();
-
-  const { data: joinResult, error: joinError } = await supabaseClient.rpc("join_station_line", {
-    target_line_id: lineId
-  });
-
-  if (joinError || joinResult !== "OK") {
-    setStatus("workerSetupStatus", "❌ Nie udało się dołączyć do stanowiska: " + (joinError?.message || joinResult), "bad");
-    sound("bad");
-    return;
-  }
-
-  currentLineId = lineId;
-  currentLineName = lineName;
-  currentMode = "worker";
-
-  setStationSession("worker", currentLineId);
-
-  el("currentLineLabel").innerText = currentLineName;
-  el("mainTitle").innerText = "Pracownik — " + currentLineName;
-
-  hideAllMainScreens();
-  el("workerScreen").classList.remove("hidden");
-
-  await loadMyAssignment();
-  await loadTasks();
-  startWorkerRefresh();
-
-  sound("ok");
-}
-
-async function loadMyAssignment() {
-  if (!currentLineId) return;
-
-  const { data, error } = await supabaseClient.rpc("get_my_station_assignment", {
-    target_line_id: currentLineId
-  });
-
-  if (error) {
-    el("workerAssignmentBox").innerText = "Nie udało się pobrać przydziału: " + error.message;
-    el("workerAssignmentBox").className = "assignmentBanner bad";
-    myAssignedMeals = [];
-    return;
-  }
-
-  const row = data && data.length ? data[0] : null;
-  myAssignedMeals = row?.meals || [];
-
-  if (!myAssignedMeals.length) {
-    el("workerAssignmentBox").className = "assignmentBanner";
-    el("workerAssignmentBox").innerHTML = "Czekasz na przydział od lidera. Po przydzieleniu posiłków zadania pojawią się automatycznie.";
-    taskList = [];
-    currentTask = null;
-    renderWorkerTask();
-    return;
-  }
-
-  el("workerAssignmentBox").className = "assignmentBanner";
-  el("workerAssignmentBox").innerHTML = `Twoje aktualne posiłki: <b>${escapeHtml(myAssignedMeals.join(", "))}</b>`;
-}
-
-async function loadTasks() {
-  if (!currentLineId || isBusy || currentBadScan) return;
-
-  await loadMyAssignment();
-
-  if (!myAssignedMeals.length) return;
-
-  const { data, error } = await supabaseClient.rpc("get_station_tasks", {
-    target_line_id: currentLineId
-  });
-
-  if (error) {
-    el("currentTaskBox").innerHTML = `<div class="emptyState bad">Błąd pobierania zadań: ${escapeHtml(error.message)}</div>`;
-    return;
-  }
-
-  taskList = (data || []).filter(x => !["ok", "brak", "forced_bad"].includes(String(x.status || "").toLowerCase()));
-  currentTask = taskList[0] || null;
-  renderWorkerTask();
-}
-
-function renderWorkerTask(errorMessage = "") {
-  if (!currentTask) {
-    el("currentTaskBox").className = "taskCard";
-    el("currentTaskBox").innerHTML = `<div class="emptyState">${myAssignedMeals.length ? "Brak zadania. Czekam na torby w kolejce..." : "Czekasz na przydział posiłków od lidera."}</div>`;
-    el("nextTasks").innerHTML = "";
-    return;
-  }
-
-  el("currentTaskBox").className = errorMessage ? "taskCard errorState" : "taskCard";
-
-  const badScanHtml = currentBadScan ? `
-    <div class="wrongScanBox">
-      Nieprawidłowa tacka zeskanowana do tej torby:
-      <div class="wrongCode">${escapeHtml(currentBadScan.scannedValue)}</div>
-      <div class="taskActions">
-        <button class="lightBtn" onclick="removeBadScanAndRetry()">Usuń błędną tackę i skanuj ponownie</button>
-        <button class="danger" onclick="forceBadCurrentTask()">Zostaw i zapakuj jako niepoprawną</button>
-      </div>
-    </div>
-  ` : "";
-
-  el("currentTaskBox").innerHTML = `
-    <div class="taskHeader">
+<div class="mobileView hidden" id="mobileScreen">
+  <div id="mobileAlertBox" class="mobileAlertBox hidden"></div>
+  <div id="mobileBrakiBox" class="mobileBrakiBox hidden"></div>
+
+  <div class="mobileTopbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <img src="logo.png" class="mobileLogo" alt="logo">
       <div>
-        <div class="metaLabel">Aktualna torba</div>
-        <div class="taskBag">${escapeHtml(currentTask.bag_qr)}</div>
-        <div class="muted">Torba w kolejce: ${escapeHtml(currentTask.queue_position)}</div>
+        <h1 id="mobileTitleEl">Raport pakowania</h1>
+        <div class="small">Odświeżono: <span id="mobileLastRefresh">-</span></div>
       </div>
-      <div class="taskMeal">${escapeHtml(currentTask.meal)}</div>
     </div>
-
-    <div class="taskMeta">
-      <div class="metaBox"><div class="metaLabel">Kod</div><div class="metaValue">${escapeHtml(currentTask.code || "-")}</div></div>
-      <div class="metaBox"><div class="metaLabel">Rozmiar</div><div class="metaValue">${escapeHtml(currentTask.size || "-")}</div></div>
-      <div class="metaBox"><div class="metaLabel">QR tacki</div><div class="metaValue">${escapeHtml(currentTask.tray_qr || "-")}</div></div>
+    <div class="mobileTopbarRight">
+      <button onclick="loadReport()" style="background:#111827;">↻</button>
+      <button onclick="logout()" style="background:#ef4444;">Wyloguj</button>
     </div>
+  </div>
 
-    <div class="metaBox" style="margin-bottom:18px;">
-      <div class="metaLabel">Nazwa dania</div>
-      <div class="metaValue">${escapeHtml(currentTask.dish_name || "-")}</div>
+  <div class="mobileStatsGrid">
+    <div class="mobileStatCard fullWidth">
+      <div class="mobileStatLabel">Postęp pakowania</div>
+      <div class="mobileStatValue" id="mobileTotalStat">0 / 0</div>
+      <div class="mobileProgressBar">
+        <div class="mobileProgressFill" id="mobileProgressFill"></div>
+      </div>
     </div>
-
-    <input id="trayScanInput" class="scanInput" placeholder="Zeskanuj tackę" ${currentBadScan ? "disabled" : ""} autocomplete="off">
-
-    ${errorMessage ? `<p class="statusBox bad">${escapeHtml(errorMessage)}</p>` : ""}
-    ${badScanHtml}
-
-    <div class="taskActions">
-      <button id="brakTaskBtn" class="warning" onclick="markCurrentTaskBrak()" ${currentBadScan ? "disabled" : ""}>🟡 BRAKI / do dopakowania</button>
-      <button class="lightBtn" onclick="loadTasks()">Odśwież</button>
+    <div class="mobileStatCard">
+      <div class="mobileStatLabel">Poprawne</div>
+      <div class="mobileStatValue ok" id="mobileCorrectStat">0</div>
     </div>
-  `;
-
-  const scanInput = el("trayScanInput");
-
-  if (scanInput && !currentBadScan) {
-    focusTrayScanInput();
-    scanInput.addEventListener("keydown", e => {
-      if (e.key === "Enter") scanCurrentTray();
-    });
-  }
-
-  renderNextTasks();
-}
-function renderNextTasks() {
-  const next = taskList.slice(1, 8);
-
-  if (!next.length) {
-    el("nextTasks").innerHTML = `<div class="muted">Brak kolejnych zadań.</div>`;
-    return;
-  }
-
-  el("nextTasks").innerHTML = next.map(task => `
-    <div class="nextItem">
-      <b>${escapeHtml(task.bag_qr)}</b><br>
-      <span class="muted">
-        Torba ${escapeHtml(task.queue_position)} |
-        ${escapeHtml(task.meal)} |
-        ${escapeHtml(task.code || "-")} |
-        ${escapeHtml(task.size || "-")}
-      </span>
+    <div class="mobileStatCard">
+      <div class="mobileStatLabel">Niepoprawne</div>
+      <div class="mobileStatValue bad" id="mobileBadStat">0</div>
     </div>
-  `).join("");
-}
-
-async function scanCurrentTray() {
-  if (!currentTask || isBusy || currentBadScan) return;
-
-  const input = el("trayScanInput");
-  const scannedValue = normalizeQr(input.value);
-  input.value = scannedValue;
-
-  if (!scannedValue) return;
-
-  isBusy = true;
-
-  const { data, error } = await supabaseClient.rpc("scan_station_task_tray", {
-    target_bag_id: currentTask.bag_id,
-    target_plan_item_id: currentTask.plan_item_id,
-    scanned_tray_qr: scannedValue
-  });
-
-  isBusy = false;
-
-  if (error) {
-    renderWorkerTask("Błąd skanowania: " + error.message);
-    sound("bad");
-    return;
-  }
-
-  if (data === "OK") {
-    currentBadScan = null;
-    sound("ok");
-    await tryCloseCurrentBag();
-    await loadTasks();
-    return;
-  }
-
-  if (data === "WRONG" || data === "DUPLICATE") {
-    currentBadScan = {
-      scannedValue,
-      type: data,
-      bag_id: currentTask.bag_id,
-      plan_item_id: currentTask.plan_item_id
-    };
-
-    renderWorkerTask(data === "WRONG"
-      ? "❌ Zła tacka. Usuń błędną tackę i zeskanuj prawidłową albo zostaw torbę jako niepoprawną."
-      : "⚠️ Duplikat tacki. Usuń błędną tackę i zeskanuj prawidłową albo zostaw torbę jako niepoprawną."
-    );
-
-    sound("bad");
-    return;
-  }
-
-  if (data === "ALREADY_DONE") {
-    currentBadScan = null;
-    sound("warn");
-    await tryCloseCurrentBag();
-    await loadTasks();
-    return;
-  }
-
-  renderWorkerTask("❌ Nieoczekiwany status: " + data);
-  sound("bad");
-}
-
-async function removeBadScanAndRetry() {
-  if (!currentTask || !currentBadScan || isBusy) return;
-
-  isBusy = true;
-
-  const { data, error } = await supabaseClient.rpc("remove_station_bad_scan_for_item", {
-    target_bag_id: currentBadScan.bag_id,
-    target_plan_item_id: currentBadScan.plan_item_id
-  });
-
-  isBusy = false;
-
-  if (error || data !== "OK") {
-    renderWorkerTask("❌ Nie udało się usunąć błędnego skanu: " + (error?.message || data));
-    sound("bad");
-    return;
-  }
-
-  currentBadScan = null;
-  renderWorkerTask("Usunięto błędny skan. Zeskanuj prawidłową tackę.");
-  sound("warn");
-}
-
-async function markCurrentTaskBrak() {
-  if (!currentTask || isBusy || currentBadScan) return;
-
-  isBusy = true;
-
-  const brakBtn = el("brakTaskBtn");
-  const badBtn = el("badTaskBtn");
-  if (brakBtn) {
-    brakBtn.disabled = true;
-    brakBtn.innerText = "Zapisuję BRAKI...";
-  }
-  if (badBtn) badBtn.disabled = true;
-
-  const taskSnapshot = { ...currentTask };
-
-  const { data, error } = await supabaseClient.rpc("mark_station_task_brak", {
-    target_bag_id: taskSnapshot.bag_id,
-    target_plan_item_id: taskSnapshot.plan_item_id
-  });
-
-  isBusy = false;
-
-  if (error || data !== "OK") {
-    renderWorkerTask("❌ Nie udało się oznaczyć BRAKI: " + (error?.message || data));
-    sound("bad");
-    return;
-  }
-
-  currentBadScan = null;
-  currentTask = null;
-  sound("warn");
-
-  await tryCloseBagById(taskSnapshot.bag_id);
-  await loadTasks();
-}
-
-async function forceBadCurrentTask() {
-  if (!currentTask || isBusy) return;
-
-  isBusy = true;
-
-  const taskSnapshot = { ...currentTask };
-
-  const { data, error } = await supabaseClient.rpc("force_station_task_bad", {
-    target_bag_id: taskSnapshot.bag_id,
-    target_plan_item_id: taskSnapshot.plan_item_id
-  });
-
-  isBusy = false;
-
-  if (error || data !== "OK") {
-    renderWorkerTask("❌ Nie udało się oznaczyć jako niepoprawną: " + (error?.message || data));
-    sound("bad");
-    return;
-  }
-
-  currentBadScan = null;
-  currentTask = null;
-  sound("warn");
-
-  await tryCloseBagById(taskSnapshot.bag_id);
-  await loadTasks();
-}
-
-async function tryCloseBagById(bagId) {
-  if (!bagId) return;
-
-  const { data, error } = await supabaseClient.rpc("try_close_station_bag", {
-    target_bag_id: bagId
-  });
-
-  if (error) {
-    console.error("Błąd zamykania torby:", error);
-    return;
-  }
-
-  const result = normalizeStatus(data);
-
- if (result === "POPRAWNA" || result === "NIEPOPRAWNA" || result === "BRAKI") {
-  sound("done");
-}
-
-  if (["POPRAWNA", "NIEPOPRAWNA", "BRAKI"].includes(result)) {
-    await Promise.allSettled([
-      loadQueue(),
-      loadLineHistory()
-    ]);
-  }
-}
-
-async function tryCloseCurrentBag() {
-  if (!currentTask) return;
-  await tryCloseBagById(currentTask.bag_id);
-}
-
-function startLeaderRefresh() {
-  stopRefresh();
-
-  refreshTimer = setInterval(async () => {
-    await refreshLeaderData();
-  }, 3000);
-}
-
-function startWorkerRefresh() {
-  stopRefresh();
-  refreshTimer = setInterval(loadTasks, 3000);
-}
-
-function stopRefresh() {
-  if (refreshTimer) {
-    clearInterval(refreshTimer);
-    refreshTimer = null;
-  }
-}
-
-async function restoreExistingSession() {
-  const { data } = await supabaseClient.auth.getSession();
-
-  if (!data || !data.session || !data.session.user) return;
-
-  currentUser = data.session.user;
-  currentAccessToken = data.session.access_token || "";
-  currentRole = await getUserRole(currentUser.id);
-  currentLoginMode = "session";
-
-  if (!hasAccess(currentRole)) {
-    await supabaseClient.auth.signOut();
-    return;
-  }
-
-  await cleanupPreviousWorkerSessionIfNeeded();
-
-  el("currentUserLabel").innerText = displayLogin(currentUser.email);
-  el("loginScreen").classList.add("hidden");
-  el("appScreen").classList.remove("hidden");
-
-  await loadLines();
-  await loadMeals();
-  await goToModeScreen();
-}
-
-el("qrLoginInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") qrLogin();
-});
-
-el("email").addEventListener("keydown", e => {
-  if (e.key === "Enter") el("password").focus();
-});
-
-el("password").addEventListener("keydown", e => {
-  if (e.key === "Enter") login();
-});
-
-el("leaderBagInput").addEventListener("input", e => {
-  const normalized = normalizeQr(e.target.value);
-  if (e.target.value !== normalized) e.target.value = normalized;
-});
-
-el("leaderBagInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") addLeaderBag();
-});
-
-window.addEventListener("click", event => {
-  if (event.target.closest("button,input,select,textarea,label")) return;
-
-  setTimeout(() => {
-    if (!el("loginScreen").classList.contains("hidden")) {
-      if (el("passwordLoginBox").classList.contains("hidden")) {
-        el("qrLoginInput").focus();
-      }
-    }
-
-    if (currentMode === "leader" && leaderActiveTab === "scan" && !el("leaderScreen").classList.contains("hidden")) {
-      el("leaderBagInput")?.focus();
-    }
-
-    if (currentMode === "worker" && !el("workerScreen").classList.contains("hidden") && !currentBadScan) {
-      el("trayScanInput")?.focus();
-    }
-  }, 50);
-});
-
-window.addEventListener("pagehide", () => {
-  if (currentMode === "worker" && currentLineId) {
-    leaveMyStationLineKeepAlive(currentLineId);
-  }
-});
-
-window.addEventListener("beforeunload", () => {
-  if (currentMode === "worker" && currentLineId) {
-    leaveMyStationLineKeepAlive(currentLineId);
-  }
-});
-
-window.addEventListener("DOMContentLoaded", async () => {
-  focusQrInput();
-  await restoreExistingSession();
-});
-</script>
-
+    <div class="mobileStatCard">
+      <div class="mobileStatLabel">Braki</div>
+      <div class="mobileStatValue warn" id="mobileBrakiStat">0</div>
+    </div>
+    <div class="mobileStatCard">
+      <div class="mobileStatLabel">Poprawność</div>
+      <div class="mobileStatValue" id="mobileAccuracyStat">0%</div>
+    </div>
+  </div>
+
+  <div class="mobileHistoryCard">
+    <h2>🧾 Ostatnie torby</h2>
+    <div id="mobileHistoryList"></div>
+  </div>
+</div>
+<script src="app.js"></script>
 </body>
 </html>
